@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: cesizen-postgres
+    environment:
+      POSTGRES_USER: cesizen
+      POSTGRES_PASSWORD: cesizen123
+      POSTGRES_DB: cesizen
+    ports:
+      - "5432:5432"
+    volumes:
+      - cesizen_data:/var/lib/postgresql/data
+
+volumes:
+  cesizen_data:
