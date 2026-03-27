@@ -25,7 +25,7 @@ export function Navbar() {
   return (
     <>
       {/* ── Barre de navigation desktop ── */}
-      <nav className="sticky top-0 z-60 bg-white border-b border-none md:border-gray-200">
+      <nav className=" bg-white/70 backdrop-blur-md sticky top-0 z-60 shadow-sm">
         <div className="max-w-6xl mx-auto px-4 md:px-6 h-16 flex items-center justify-center md:justify-between gap-4 md:gap-8">
 
           {/* Logo */}
@@ -40,7 +40,7 @@ export function Navbar() {
             />
           </Link>
           {/* Texte sous le logo */}
-          <div className="flex flex-col ml-2">
+          <div className="lg:flex flex-col ml-2 hidden">
             <span className="text-xs text-gray-500">
               Votre bien-être<br />à portée de main
             </span>
@@ -93,40 +93,42 @@ export function Navbar() {
           </ul>
 
           {/* Bouton Connexion — masqué sur mobile */}
-          <Button
-            variant="text"
-            size="small"
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              px: 2,
-              py: 1,
-              borderRadius: "15px",
-              fontSize: "0.875rem",
-              fontWeight: 500,
-              color: "#fff",
-              background: "linear-gradient(135deg, #FDC700 0%, #FF8904 100%)",
-              textTransform: "none",
-              whiteSpace: "nowrap",
-              transform: "scale(1)",
-              transition: "background .2s, color .2s, transform .2s",
-              minWidth: "unset",
-              "&:hover": {
+          <div className="hidden md:block">
+            <Button
+              variant="text"
+              size="small"
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                px: 2,
+                py: 1,
+                borderRadius: "15px",
+                fontSize: "0.875rem",
+                fontWeight: 500,
+                color: "#fff",
                 background: "linear-gradient(135deg, #FDC700 0%, #FF8904 100%)",
-                transform: "scale(1.05)",
-              },
-              "&:active": { transform: "scale(0.97)" },
-            }}
-          >
-            Connexion
-          </Button>
+                textTransform: "none",
+                whiteSpace: "nowrap",
+                transform: "scale(1)",
+                transition: "background .2s, color .2s, transform .2s",
+                minWidth: "unset",
+                "&:hover": {
+                  background: "linear-gradient(135deg, #FDC700 0%, #FF8904 100%)",
+                  transform: "scale(1.05)",
+                },
+                "&:active": { transform: "scale(0.97)" },
+              }}
+            >
+              Connexion
+            </Button>
+          </div>
         </div>
       </nav>
 
       {/* ── Barre de navigation mobile flottante (bottom) ── */}
       <div className="md:hidden fixed bottom-0 left-0 w-full z-50 px-6 pb-4">
-        <div className="mx-auto w-full max-w-3xl rounded-[24px] border border-gray-200 bg-white px-2.5 py-2.5 shadow-[0_8px_22px_rgba(15,23,42,0.16)]">
+        <div className="mx-auto w-full max-w-3xl rounded-[24px] bg-white/70 backdrop-blur-md px-2.5 py-2.5 shadow-[0_8px_22px_rgba(15,23,42,0.16)]">
           <div className="flex items-end justify-between gap-2">
             {mobileNavLinks.map(({ href, label, icon: Icon }) => {
               const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -145,7 +147,7 @@ export function Navbar() {
                       minWidth: "unset",
                       width: 42,
                       height: 42,
-                      borderRadius: "999px",
+                      borderRadius: "15px",
                       p: 0,
                       color: isActive ? "#fff" : "#64748b",
                       background: isActive ? "linear-gradient(135deg, #00BC7D 0%, #00C950 100%)" : "transparent",
