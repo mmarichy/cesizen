@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Heart, Brain, Shield, ArrowRight, Zap } from "lucide-react";
+import { Brain, ArrowRight, Zap } from "lucide-react";
+import { homeStats } from "@/constants";
 import { Button } from "@/components/ui/button";
 
 const HERO_BUTTON_BASE_SX = {
@@ -25,7 +26,7 @@ const heroCards = [
     description: "Des contenus validés par des professionnels",
     icon: Brain,
     cardClass:
-      "absolute top-0 right-0 w-full h-56 bg-linear-to-br from-yellow-400/90 to-amber-500/90 backdrop-blur-xl rounded-3xl shadow-2xl transform rotate-6 hover:rotate-0 hover:scale-110 transition-all duration-500 border border-white/20 cursor-pointer z-10 hover:z-40",
+      "absolute top-0 right-0 w-full h-56 bg-linear-to-br from-yellow-400/90 to-amber-500/90 backdrop-blur-xl rounded-2xl shadow-2xl transform rotate-6 hover:rotate-0 hover:scale-110 transition-all duration-500 cursor-pointer z-10 hover:z-40",
   },
   {
     id: "activites",
@@ -34,22 +35,15 @@ const heroCards = [
     description: "Méditation, respiration et relaxation",
     icon: Zap,
     cardClass:
-      "absolute top-16 right-12 w-full h-56 bg-linear-to-br from-emerald-500/95 to-green-600/95 backdrop-blur-xl rounded-3xl shadow-2xl transform -rotate-6 hover:rotate-0 hover:scale-110 transition-all duration-500 border border-white/20 cursor-pointer z-20 hover:z-40",
+      "absolute top-16 right-12 w-full h-56 bg-linear-to-br from-emerald-500/95 to-green-600/95 backdrop-blur-xl rounded-2xl shadow-2xl transform -rotate-6 hover:rotate-0 hover:scale-110 transition-all duration-500 cursor-pointer z-20 hover:z-40",
   },
-];
-
-const stats = [
-  { value: "15+", label: "Activités", icon: Zap, gradient: "from-emerald-500 to-green-500" },
-  { value: "10+", label: "Articles", icon: Brain, gradient: "from-amber-500 to-yellow-500" },
-  { value: "100%", label: "Gratuit", icon: Heart, gradient: "from-emerald-500 to-green-500" },
-  { value: "RGPD", label: "Conforme", icon: Shield, gradient: "from-amber-500 to-yellow-500" },
 ];
 
 export default function Page() {
   return (
-    <div className="min-h-screen bg-linear-to-br from-white via-emerald-50/30 to-yellow-50/40 pb-24 md:pb-6">
+    <div className="min-h-screen bg-linear-to-br from-white via-emerald-50/30 to-yellow-50/30 md:from-white md:via-emerald-300/30 md:to-yellow-400/30 pb-24 md:pb-6">
       {/* Hero Section - Full Height */}
-      <section className="relative min-h-[calc(100vh-200px)] flex items-center justify-center px-4 sm:px-6 lg:px-8">
+      <section className="relative flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-15 pb-15 md:pt-20 md:pb-20">
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {/* Floating orbs */}
@@ -83,6 +77,7 @@ export default function Page() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Link href="/articles" className="no-underline">
                   <Button
+                    className="w-full sm:w-auto"
                     variant="outlined"
                     sx={{
                       ...HERO_BUTTON_BASE_SX,
@@ -102,6 +97,7 @@ export default function Page() {
 
                 <Link href="/activites" className="no-underline">
                   <Button
+                    className="w-full sm:w-auto"
                     variant="outlined"
                     sx={{
                       ...HERO_BUTTON_BASE_SX,
@@ -158,12 +154,12 @@ export default function Page() {
       {/* Stats Section - Bottom */}
       <section className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 lg:mt-24">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-          {stats.map((stat) => {
+          {homeStats.map((stat) => {
             const Icon = stat.icon;
             return (
               <div
                 key={stat.label}
-                className="relative group bg-white/60 backdrop-blur-md rounded-2xl p-6 border border-gray-200/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                className="relative group bg-white/60 backdrop-blur-md rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
               >
                 {/* Hover overlay foncé */}
                 <div className={`absolute inset-0 bg-linear-to-br ${stat.gradient} opacity-0 group-hover:opacity-15 rounded-2xl transition-opacity duration-300`}></div>

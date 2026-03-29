@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Heart } from "lucide-react";
@@ -52,8 +53,8 @@ export function Footer() {
                     <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: dotColor }} />
                     <Link
                       href={href}
-                      style={{ "--hover-color": hoverColor } as React.CSSProperties}
-                      className="text-sm text-gray-400 transition-colors no-underline hover:text-(--hover-color)"
+                      style={{ "--hover-color": hoverColor } as CSSProperties}
+                      className="text-sm text-gray-400 transition-colors no-underline hover:text-(--hover-color) duration-300"
                     >
                       {label}
                     </Link>
@@ -71,8 +72,8 @@ export function Footer() {
                     <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: dotColor }} />
                     <Link
                       href={href}
-                      className="text-sm text-gray-400 transition-colors no-underline hover:text-(--hover-color)"
-                      style={{ "--hover-color": hoverColor } as React.CSSProperties}
+                      className="text-sm text-gray-400 transition-colors no-underline hover:text-(--hover-color) duration-300"
+                      style={{ "--hover-color": hoverColor } as CSSProperties}
                     >
                       {label}
                     </Link>

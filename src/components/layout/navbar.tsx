@@ -3,21 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, BookOpen, Activity, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-const navLinks = [
-  { href: "/", label: "Accueil", icon: Home },
-  { href: "/articles", label: "Articles", icon: BookOpen },
-  { href: "/activites", label: "Activités", icon: Activity },
-];
-
-const mobileNavLinks = [
-  { href: "/", label: "Accueil", icon: Home },
-  { href: "/articles", label: "Articles", icon: BookOpen },
-  { href: "/activites", label: "Activités", icon: Activity },
-  { href: "/profil", label: "Profil", icon: User },
-];
+import { navLinks, mobileNavLinks } from "@/constants";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -97,6 +84,7 @@ export function Navbar() {
             <Button
               variant="text"
               size="small"
+              onClick={() => window.location.href = "/auth/login"}
               sx={{
                 display: "flex",
                 alignItems: "center",
@@ -128,7 +116,7 @@ export function Navbar() {
 
       {/* ── Barre de navigation mobile flottante (bottom) ── */}
       <div className="md:hidden fixed bottom-0 left-0 w-full z-50 px-6 pb-4">
-        <div className="mx-auto w-full max-w-3xl rounded-[24px] bg-white/70 backdrop-blur-md px-2.5 py-2.5 shadow-[0_8px_22px_rgba(15,23,42,0.16)]">
+        <div className="mx-auto w-full max-w-3xl rounded-2xl bg-white/70 backdrop-blur-md px-2.5 py-2.5 shadow-sm">
           <div className="flex items-end justify-between gap-2">
             {mobileNavLinks.map(({ href, label, icon: Icon }) => {
               const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -142,6 +130,7 @@ export function Navbar() {
                   <Button
                     variant={isActive ? "contained" : "text"}
                     disableElevation
+                    onClick={() => window.location.href = href}
                     sx={{
                       textTransform: "none",
                       minWidth: "unset",
