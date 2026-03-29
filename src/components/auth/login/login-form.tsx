@@ -45,7 +45,15 @@ export function LoginForm() {
       }
 
       if (res?.ok) {
-        router.push("/");
+        const callbackUrl = searchParams.get("callbackUrl");
+        const redirectTo =
+          callbackUrl &&
+          callbackUrl.startsWith("/") &&
+          !callbackUrl.startsWith("//") &&
+          !callbackUrl.includes("://")
+            ? callbackUrl
+            : "/profil";
+        router.push(redirectTo);
         router.refresh();
       }
     } finally {
