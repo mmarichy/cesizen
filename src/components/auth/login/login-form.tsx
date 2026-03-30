@@ -123,15 +123,6 @@ export function LoginForm() {
         </label>
 
         <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
-          <label className="flex cursor-pointer items-center gap-2 text-gray-700">
-            <input
-              name="remember"
-              type="checkbox"
-              disabled={loading}
-              className="size-4 rounded border-gray-300 text-emerald-600 accent-emerald-600"
-            />
-            <span>Se souvenir de moi</span>
-          </label>
           <Link
             href="/auth/register"
             className="font-medium text-emerald-600 no-underline hover:underline"
