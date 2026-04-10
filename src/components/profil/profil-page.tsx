@@ -94,7 +94,7 @@ export function ProfilPage({ user }: { user: ProfilPageUser }) {
               </div>
               <div className="flex flex-col sm:flex-row flex-wrap gap-3 pt-4 justify-center sm:justify-start">
                 <Link
-                  href="/profil/modifier"
+                  href="/profil/parametre"
                   className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-[14px] font-semibold text-sm sm:text-base border-2 no-underline transition-transform hover:scale-[1.02] active:scale-[0.98]"
                   style={{
                     borderColor: CESI_GREEN,
