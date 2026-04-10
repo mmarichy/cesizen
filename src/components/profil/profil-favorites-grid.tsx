@@ -66,7 +66,7 @@ export function ProfilFavoritesGrid({
 	const removeFavorite = useCallback(
 		async (activityId: string) => {
 			const response = await fetch(
-				`/api/me/activity-favorites?activityId=${encodeURIComponent(activityId)}`,
+				`/api/account/activity-favorites?activityId=${encodeURIComponent(activityId)}`,
 				{ method: "DELETE" },
 			);
 			if (response.ok) {

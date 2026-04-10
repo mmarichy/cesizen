@@ -1,7 +1,3 @@
-/**
- * Pagination « par page » partagée (articles, activités, etc.).
- */
-
 export const DEFAULT_PER_PAGE = 24;
 
 export const PER_PAGE_OPTIONS = [6, 12, 18, 24] as const;
@@ -24,7 +20,6 @@ export function parsePerPageParam(
 	return DEFAULT_PER_PAGE;
 }
 
-/** Taille des blocs chargés au scroll sur la page 1. */
 export function scrollChunkSize(perPage: number): number {
 	return Math.min(
 		12,

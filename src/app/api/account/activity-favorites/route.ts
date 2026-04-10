@@ -24,7 +24,7 @@ export async function GET() {
 		});
 	} catch (error) {
 		console.error(
-			"Erreur GET /api/me/activity-favorites:",
+			"Erreur GET /api/account/activity-favorites:",
 			error,
 		);
 		return NextResponse.json(
@@ -90,7 +90,7 @@ export async function POST(request: Request) {
 		return NextResponse.json({ ok: true });
 	} catch (error) {
 		console.error(
-			"Erreur POST /api/me/activity-favorites:",
+			"Erreur POST /api/account/activity-favorites:",
 			error,
 		);
 		return NextResponse.json(
@@ -131,7 +131,7 @@ export async function DELETE(request: Request) {
 		return NextResponse.json({ ok: true });
 	} catch (error) {
 		console.error(
-			"Erreur DELETE /api/me/activity-favorites:",
+			"Erreur DELETE /api/account/activity-favorites:",
 			error,
 		);
 		return NextResponse.json(

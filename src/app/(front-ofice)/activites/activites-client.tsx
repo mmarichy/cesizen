@@ -55,7 +55,7 @@ export function ActivitesClient({
 		const load = async () => {
 			try {
 				const response = await fetch(
-					"/api/me/activity-favorites",
+									"/api/account/activity-favorites",
 					{ cache: "no-store" },
 				);
 				if (!response.ok || cancelled) return;
@@ -87,7 +87,7 @@ export function ActivitesClient({
 			try {
 				if (next) {
 					const response = await fetch(
-						"/api/me/activity-favorites",
+										"/api/account/activity-favorites",
 						{
 							method: "POST",
 							headers: {
@@ -110,7 +110,7 @@ export function ActivitesClient({
 					}
 				} else {
 					const response = await fetch(
-						`/api/me/activity-favorites?activityId=${encodeURIComponent(activityId)}`,
+						`/api/account/activity-favorites?activityId=${encodeURIComponent(activityId)}`,
 						{ method: "DELETE" },
 					);
 					if (response.ok) {
@@ -209,7 +209,7 @@ export function ActivitesClient({
 							minWidth: { xs: 0, md: 160 },
 						}}>
 						<MenuItem value="">
-							<em>Toutes les catégories</em>
+							Toutes les catégories
 						</MenuItem>
 						{activityCategories.map((c) => (
 							<MenuItem key={c} value={c}>
@@ -237,7 +237,7 @@ export function ActivitesClient({
 							minWidth: { xs: 0, md: 160 },
 						}}>
 						<MenuItem value="">
-							<em>Tous les niveaux</em>
+							Tous les niveaux
 						</MenuItem>
 						{activityDifficulties.map((d) => (
 							<MenuItem key={d} value={d}>
@@ -271,7 +271,7 @@ export function ActivitesClient({
 							minWidth: { xs: 0, md: 160 },
 						}}>
 						<MenuItem value="">
-							<em>Toutes les durées</em>
+							Toutes les durées
 						</MenuItem>
 						{activityDurationFilterOptions.map(
 							(opt) => (

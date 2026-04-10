@@ -100,9 +100,12 @@ export function FilterSelect({
 						: [formSx]
 					: []),
 			]}>
-			<InputLabel id={labelId}>{label}</InputLabel>
+			<InputLabel id={labelId} shrink>
+				{label}
+			</InputLabel>
 			<Select
 				{...selectRest}
+				displayEmpty
 				labelId={labelId}
 				id={fieldId}
 				label={label}
@@ -128,7 +131,7 @@ export function FilterSelect({
 				slotProps={slotProps}
 				sx={[
 					{
-						borderRadius: "14px",
+						borderRadius: 9999,
 						backgroundColor: "#fff",
 						fontWeight: 500,
 						color: "#0f172a",

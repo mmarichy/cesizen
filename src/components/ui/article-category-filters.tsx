@@ -56,7 +56,7 @@ export function ArticleCategoryFilters({
 					maxWidth: { md: 480 },
 				}}>
 				<MenuItem value="">
-					<em>Tous les articles</em>
+					Tous les articles
 				</MenuItem>
 				{categories.map((c) => (
 					<MenuItem key={c.label} value={c.label}>
