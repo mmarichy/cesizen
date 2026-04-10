@@ -2,7 +2,7 @@
 
 import MenuItem from "@mui/material/MenuItem";
 import Stack from "@mui/material/Stack";
-import { categories } from "@/app/(front-ofice)/articles/data";
+import { categories } from "@/lib/articles";
 import {
 	PER_PAGE_OPTIONS,
 	type PerPageChoice,

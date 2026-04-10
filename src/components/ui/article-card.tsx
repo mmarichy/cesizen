@@ -15,62 +15,13 @@ import {
 	Tag,
 	User,
 } from "lucide-react";
-import type {
-	Article,
-	ArticleCategoryColor,
-} from "@/app/(front-ofice)/articles/data";
+import type { Article } from "@/lib/articles";
 
-const chipSxByCategory: Record<
-	ArticleCategoryColor,
-	SxProps<Theme>
-> = {
-	purple: {
-		backgroundColor: "#9333ea",
-		color: "#fff",
-		fontWeight: 600,
-		"& .MuiChip-icon": {
-			color: "inherit",
-		},
-	},
-	green: {
-		backgroundColor: "#16a34a",
-		color: "#fff",
-		fontWeight: 600,
-		"& .MuiChip-icon": {
-			color: "inherit",
-		},
-	},
-	blue: {
-		backgroundColor: "#2563eb",
-		color: "#fff",
-		fontWeight: 600,
-		"& .MuiChip-icon": {
-			color: "inherit",
-		},
-	},
-	orange: {
-		backgroundColor: "#ea580c",
-		color: "#fff",
-		fontWeight: 600,
-		"& .MuiChip-icon": {
-			color: "inherit",
-		},
-	},
-	yellow: {
-		backgroundColor: "#ca8a04",
-		color: "#fff",
-		fontWeight: 600,
-		"& .MuiChip-icon": {
-			color: "inherit",
-		},
-	},
-	red: {
-		backgroundColor: "#dc2626",
-		color: "#fff",
-		fontWeight: 600,
-		"& .MuiChip-icon": {
-			color: "inherit",
-		},
+const categoryChipBaseSx: SxProps<Theme> = {
+	color: "#fff",
+	fontWeight: 600,
+	"& .MuiChip-icon": {
+		color: "inherit",
 	},
 };
 
@@ -79,10 +30,10 @@ export function ArticleCard({
 }: {
 	article: Article;
 }) {
-	const chipSx =
-		chipSxByCategory[
-			article.category.color
-		];
+	const chipSx: SxProps<Theme> = {
+		...categoryChipBaseSx,
+		backgroundColor: article.category.color,
+	};
 
 	return (
 		<Card

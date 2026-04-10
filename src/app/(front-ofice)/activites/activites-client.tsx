@@ -1,390 +1,134 @@
 "use client";
 
-import {
-	usePathname,
-	useRouter,
-	useSearchParams,
-} from "next/navigation";
-import {
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-} from "react";
 import MenuItem from "@mui/material/MenuItem";
 import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import {
+	useCallback,
+	useEffect,
+	useState,
+	startTransition,
+} from "react";
+import { useSession } from "next-auth/react";
 import { ActivityCard } from "@/components/ui/activity-card";
 import { FilterSelect } from "@/components/ui/filter-select";
 import { SearchField } from "@/components/ui/search-field";
-import type {
-	Activity,
-	ActivityCategory,
-	ActivityDifficulty,
-} from "./data";
-import {
-	activityCategories,
-	activityDifficulties,
-} from "./data";
 import {
 	PER_PAGE_OPTIONS,
 	type PerPageChoice,
-	parsePerPageParam,
-	pathnameWithQuery,
-	scrollChunkSize,
 } from "@/constants/listing-per-page";
-
-function activityMatchesQuery(
-	activity: Activity,
-	rawQuery: string,
-): boolean {
-	const q = rawQuery.trim().toLowerCase();
-	if (!q) return true;
-	const haystack = [
-		activity.title,
-		activity.description,
-		activity.category,
-	]
-		.join(" ")
-		.toLowerCase();
-	return haystack.includes(q);
-}
+import { useActivitesClientViewModel } from "@/hooks/use-activites-client-view-model";
+import {
+	activityCategories,
+	activityDifficulties,
+	activityDurationFilterOptions,
+	activityDurationFilterToUrlValue,
+	parseActivityDurationFilterFromUrl,
+	type Activity,
+	type ActivityCategory,
+	type ActivityDifficulty,
+} from "@/lib/activities";
 
 export function ActivitesClient({
-	activities,
+	activities: initialActivities = [],
 }: {
-	activities: Activity[];
+	activities?: Activity[];
 }) {
-	const router = useRouter();
-	const pathname = usePathname();
-	const searchParams = useSearchParams();
-
-	const [query, setQuery] = useState("");
-	const [category, setCategory] =
-		useState<ActivityCategory | null>(null);
-	const [difficulty, setDifficulty] =
-		useState<ActivityDifficulty | null>(null);
-	const [scrollReveal, setScrollReveal] = useState(
-		() =>
-			scrollChunkSize(
-				parsePerPageParam(
-					searchParams.get("perPage"),
-				),
-			),
+	const vm = useActivitesClientViewModel(
+		initialActivities,
 	);
-	/** Dernière carte de la grille : chargement dès qu’elle entre dans la zone visible. */
-	const loadMoreAnchorRef =
-		useRef<HTMLDivElement | null>(null);
-
-	const filtered = useMemo(
-		() =>
-			activities.filter((a) => {
-				if (!activityMatchesQuery(a, query))
-					return false;
-				if (
-					category !== null &&
-					a.category !== category
-				)
-					return false;
-				if (
-					difficulty !== null &&
-					a.difficulty !== difficulty
-				)
-					return false;
-				return true;
-			}),
-		[activities, query, category, difficulty],
-	);
-
-	const count = filtered.length;
-
-	const perPage = useMemo(
-		() =>
-			parsePerPageParam(
-				searchParams.get("perPage"),
-			),
-		[searchParams],
-	);
-
-	const scrollStep = useMemo(
-		() => scrollChunkSize(perPage),
-		[perPage],
-	);
-
-	const [perPageSynced, setPerPageSynced] =
-		useState(perPage);
-	if (perPage !== perPageSynced) {
-		setPerPageSynced(perPage);
-		setScrollReveal(scrollStep);
-	}
-
-	const totalPages = Math.ceil(
-		filtered.length / perPage,
-	);
-
-	const rawPageFromUrl = useMemo(() => {
-		const raw = parseInt(
-			searchParams.get("page") ?? "1",
-			10,
-		);
-		if (!Number.isFinite(raw) || raw < 1) {
-			return 1;
-		}
-		return Math.floor(raw);
-	}, [searchParams]);
-
-	const [prevRawPage, setPrevRawPage] =
-		useState(rawPageFromUrl);
-	if (rawPageFromUrl !== prevRawPage) {
-		const fromPagination =
-			prevRawPage !== 1 &&
-			rawPageFromUrl === 1;
-		setPrevRawPage(rawPageFromUrl);
-		if (fromPagination) {
-			setScrollReveal(
-				Math.min(perPage, filtered.length),
-			);
-		}
-	}
-
-	const page = useMemo(
-		() =>
-			Math.min(
-				rawPageFromUrl,
-				Math.max(1, totalPages),
-			),
-		[rawPageFromUrl, totalPages],
-	);
-
-	const goToPage = useCallback(
-		(
-			next: number,
-			options?: { replace?: boolean },
-		) => {
-			const params = new URLSearchParams(
-				searchParams.toString(),
-			);
-			if (next <= 1) {
-				params.delete("page");
-			} else {
-				params.set("page", String(next));
-			}
-			const url = pathnameWithQuery(
-				pathname,
-				params,
-			);
-			if (options?.replace) {
-				router.replace(url, {
-					scroll: false,
-				});
-			} else {
-				router.push(url, { scroll: false });
-			}
-		},
-		[pathname, router, searchParams],
-	);
-
-	const setPerPageInUrl = useCallback(
-		(next: PerPageChoice) => {
-			const params = new URLSearchParams(
-				searchParams.toString(),
-			);
-			params.delete("page");
-			params.set("perPage", String(next));
-			router.replace(
-				pathnameWithQuery(pathname, params),
-				{ scroll: false },
-			);
-		},
-		[pathname, router, searchParams],
-	);
+	const { data: session, status } = useSession();
+	const userId = session?.user?.id;
+	const [favoriteIds, setFavoriteIds] = useState<
+		Set<string>
+	>(new Set());
 
 	useEffect(() => {
-		const raw =
-			searchParams.get("perPage");
-		if (raw === null) return;
-		const n = parseInt(raw, 10);
-		if (
-			Number.isFinite(n) &&
-			PER_PAGE_OPTIONS.includes(
-				n as PerPageChoice,
-			)
-		) {
+		if (!userId) {
+			startTransition(() => {
+				setFavoriteIds(new Set());
+			});
 			return;
 		}
-		const params = new URLSearchParams(
-			searchParams.toString(),
-		);
-		params.delete("perPage");
-		router.replace(
-			pathnameWithQuery(pathname, params),
-			{ scroll: false },
-		);
-	}, [pathname, router, searchParams]);
-
-	useEffect(() => {
-		if (count !== 0) return;
-		if (
-			!searchParams.get("page")
-		) {
-			return;
-		}
-		const params = new URLSearchParams(
-			searchParams.toString(),
-		);
-		params.delete("page");
-		router.replace(
-			pathnameWithQuery(pathname, params),
-			{ scroll: false },
-		);
-	}, [count, pathname, router, searchParams]);
-
-	useEffect(() => {
-		if (count === 0) return;
-		if (totalPages < 1) return;
-		if (rawPageFromUrl === page) return;
-
-		const params = new URLSearchParams(
-			searchParams.toString(),
-		);
-		if (page <= 1) {
-			params.delete("page");
-		} else {
-			params.set("page", String(page));
-		}
-		router.replace(
-			pathnameWithQuery(pathname, params),
-			{ scroll: false },
-		);
-	}, [
-		count,
-		rawPageFromUrl,
-		page,
-		totalPages,
-		pathname,
-		router,
-		searchParams,
-	]);
-
-	useEffect(() => {
-		if (page !== 1) return;
-		const p = searchParams.get("page");
-		if (p === null) return;
-		if (parseInt(p, 10) !== 1) return;
-
-		const params = new URLSearchParams(
-			searchParams.toString(),
-		);
-		params.delete("page");
-		router.replace(
-			pathnameWithQuery(pathname, params),
-			{ scroll: false },
-		);
-	}, [page, pathname, router, searchParams]);
-
-	const displayedActivities = useMemo(() => {
-		if (page === 1) {
-			const cap = Math.min(
-				perPage,
-				filtered.length,
-			);
-			return filtered.slice(
-				0,
-				Math.min(scrollReveal, cap),
-			);
-		}
-		const start = (page - 1) * perPage;
-		return filtered.slice(
-			start,
-			start + perPage,
-		);
-	}, [filtered, page, scrollReveal, perPage]);
-
-	const firstPageCap = Math.min(
-		perPage,
-		filtered.length,
-	);
-	const hasMoreScroll =
-		page === 1 &&
-		scrollReveal < firstPageCap;
-
-	const showPagination =
-		totalPages > 1 &&
-		(scrollReveal >= perPage || page > 1);
-
-	useEffect(() => {
-		if (!hasMoreScroll) return;
-		const node = loadMoreAnchorRef.current;
-		if (!node) return;
-
-		const observer = new IntersectionObserver(
-			(entries) => {
-				const [entry] = entries;
-				if (!entry?.isIntersecting) return;
-				setScrollReveal((prev) =>
-					Math.min(
-						prev + scrollStep,
-						firstPageCap,
-					),
+		let cancelled = false;
+		const load = async () => {
+			try {
+				const response = await fetch(
+					"/api/me/activity-favorites",
+					{ cache: "no-store" },
 				);
-			},
-			{
-				/* Déclenche quand la dernière carte est réellement dans la zone utile (fin de lecture), pas avant. */
-				rootMargin: "0px 0px -12% 0px",
-				threshold: 0,
-			},
-		);
+				if (!response.ok || cancelled) return;
+				const data = (await response.json()) as {
+					ids?: string[];
+				};
+				if (cancelled || !Array.isArray(data.ids)) {
+					return;
+				}
+				startTransition(() => {
+					setFavoriteIds(new Set(data.ids));
+				});
+			} catch {
+				if (!cancelled) {
+					startTransition(() => {
+						setFavoriteIds(new Set());
+					});
+				}
+			}
+		};
+		void load();
+		return () => {
+			cancelled = true;
+		};
+	}, [userId]);
 
-		observer.observe(node);
-		return () => observer.disconnect();
-	}, [
-		hasMoreScroll,
-		firstPageCap,
-		scrollReveal,
-		scrollStep,
-		page,
-		displayedActivities.length,
-	]);
-
-	const skipScrollTopRef = useRef(true);
-	useEffect(() => {
-		if (skipScrollTopRef.current) {
-			skipScrollTopRef.current = false;
-			return;
-		}
-		window.scrollTo({
-			top: 0,
-			behavior: "smooth",
-		});
-	}, [page]);
-
-	const total = activities.length;
-	const noQuery = !query.trim();
-
-	const resultLine =
-		total === 0
-			? "Aucune activité disponible pour le moment"
-			: count === 0
-				? noQuery &&
-					  category !== null &&
-					  difficulty !== null
-					? "Aucune activité pour cette combinaison de filtres"
-					: noQuery && category !== null
-						? "Aucune activité dans cette catégorie"
-						: noQuery &&
-							  difficulty !== null
-							? "Aucune activité pour ce niveau"
-							: "Aucune activité ne correspond à votre recherche"
-				: count === 1
-					? "1 activité disponible"
-					: `${count} activités disponibles`;
-
-	const resetListing = useCallback(() => {
-		setScrollReveal(scrollStep);
-		goToPage(1, { replace: true });
-	}, [goToPage, scrollStep]);
+	const toggleFavorite = useCallback(
+		async (activityId: string, next: boolean) => {
+			try {
+				if (next) {
+					const response = await fetch(
+						"/api/me/activity-favorites",
+						{
+							method: "POST",
+							headers: {
+								"Content-Type":
+									"application/json",
+							},
+							body: JSON.stringify({
+								activityId,
+							}),
+						},
+					);
+					if (response.ok) {
+						startTransition(() => {
+							setFavoriteIds((prev) => {
+								const n = new Set(prev);
+								n.add(activityId);
+								return n;
+							});
+						});
+					}
+				} else {
+					const response = await fetch(
+						`/api/me/activity-favorites?activityId=${encodeURIComponent(activityId)}`,
+						{ method: "DELETE" },
+					);
+					if (response.ok) {
+						startTransition(() => {
+							setFavoriteIds((prev) => {
+								const n = new Set(prev);
+								n.delete(activityId);
+								return n;
+							});
+						});
+					}
+				}
+			} catch {
+				/* ignore */
+			}
+		},
+		[],
+	);
 
 	return (
 		<>
@@ -422,15 +166,15 @@ export function ActivitesClient({
 				</Typography>
 
 				<SearchField
-					value={query}
+					value={vm.query}
 					onChange={(e) => {
-						setQuery(e.target.value);
-						resetListing();
+						vm.onQueryChange(e.target.value);
 					}}
 					placeholder="Rechercher une activité…"
 					aria-label="Rechercher une activité"
 					maxWidth={640}
-					hideStartIcon
+					showClearButton
+					onClear={vm.clearQuery}
 					sx={{ mt: 1 }}
 				/>
 
@@ -442,23 +186,22 @@ export function ActivitesClient({
 					justifyContent="center"
 					sx={{
 						width: "100%",
-						maxWidth: 920,
+						maxWidth: 1120,
 						mt: 1,
 						px: { xs: 0, sm: 1 },
 					}}>
 					<FilterSelect
 						fieldId="activites-filtre-categorie"
 						label="Catégorie"
-						value={category ?? ""}
+						value={vm.category ?? ""}
 						onChange={(e) => {
 							const v = e.target
 								.value as string;
-							setCategory(
+							vm.onCategoryChange(
 								v === ""
 									? null
 									: (v as ActivityCategory),
 							);
-							resetListing();
 						}}
 						aria-label="Filtrer par catégorie"
 						formSx={{
@@ -478,16 +221,15 @@ export function ActivitesClient({
 					<FilterSelect
 						fieldId="activites-filtre-difficulte"
 						label="Difficulté"
-						value={difficulty ?? ""}
+						value={vm.difficulty ?? ""}
 						onChange={(e) => {
 							const v = e.target
 								.value as string;
-							setDifficulty(
+							vm.onDifficultyChange(
 								v === ""
 									? null
 									: (v as ActivityDifficulty),
 							);
-							resetListing();
 						}}
 						aria-label="Filtrer par niveau de difficulté"
 						formSx={{
@@ -504,13 +246,51 @@ export function ActivitesClient({
 						))}
 					</FilterSelect>
 
-					{total > 0 ? (
+					<FilterSelect
+						fieldId="activites-filtre-duree"
+						label="Durée"
+						value={
+							vm.durationFilter === null
+								? ""
+								: activityDurationFilterToUrlValue(
+										vm.durationFilter,
+									)
+						}
+						onChange={(e) => {
+							const v = e.target
+								.value as string;
+							vm.onDurationChange(
+								parseActivityDurationFilterFromUrl(
+									v === "" ? null : v,
+								),
+							);
+						}}
+						aria-label="Filtrer par durée"
+						formSx={{
+							flex: { md: "1 1 0" },
+							minWidth: { xs: 0, md: 160 },
+						}}>
+						<MenuItem value="">
+							<em>Toutes les durées</em>
+						</MenuItem>
+						{activityDurationFilterOptions.map(
+							(opt) => (
+								<MenuItem
+									key={opt.urlValue}
+									value={opt.urlValue}>
+									{opt.label}
+								</MenuItem>
+							),
+						)}
+					</FilterSelect>
+
+					{vm.showPerPage ? (
 						<FilterSelect
 							fieldId="activites-filtre-par-page"
 							label="Par page"
-							value={perPage}
+							value={vm.perPage}
 							onChange={(e) => {
-								setPerPageInUrl(
+								vm.onPerPageChange(
 									Number(
 										e.target.value,
 									) as PerPageChoice,
@@ -537,46 +317,56 @@ export function ActivitesClient({
 				textAlign="center"
 				fontWeight={600}
 				sx={{ mb: 3, color: "#0f172a" }}>
-				{resultLine}
+				{vm.resultLine}
 			</Typography>
 
-			{total === 0 ? (
+			{vm.isLoading ? null : vm.showEmptyCatalog ? (
 				<Typography
 					textAlign="center"
 					sx={{ color: "#475569" }}>
 					Revenez bientôt pour de nouvelles
 					séances.
 				</Typography>
-			) : count === 0 ? null : (
+			) : !vm.showGrid ? null : (
 				<>
 					<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-						{displayedActivities.map((activity, index) => {
-							const isLoadAnchor =
-								page === 1 &&
-								hasMoreScroll &&
-								index ===
-									displayedActivities.length -
-										1;
-							return (
+						{vm.displayedActivities.map(
+							(activity, index) => (
 								<div
 									key={activity.id}
 									ref={
-										isLoadAnchor
-											? loadMoreAnchorRef
+										index ===
+										vm.loadMoreAnchorIndex
+											? vm.loadMoreAnchorRef
 											: undefined
 									}
 									className="min-w-0 h-full">
 									<ActivityCard
-										activity={
-											activity
+										activity={activity}
+										isFavorite={favoriteIds.has(
+											String(
+												activity.id,
+											),
+										)}
+										onFavoriteChange={
+											status ===
+											"authenticated"
+												? (next) =>
+														toggleFavorite(
+															String(
+																activity.id,
+															),
+															next,
+														)
+												: undefined
 										}
 									/>
 								</div>
-							);
-						})}
+							),
+						)}
 					</div>
 
-					{page === 1 && hasMoreScroll ? (
+					{vm.showLoadMoreHint ? (
 						<Typography
 							variant="body2"
 							textAlign="center"
@@ -589,37 +379,26 @@ export function ActivitesClient({
 						</Typography>
 					) : null}
 
-					{showPagination ? (
+					{vm.showPagination ? (
 						<Stack
 							alignItems="center"
 							sx={{ mt: 4 }}>
 							<Pagination
-								count={totalPages}
-								page={page}
+								count={vm.totalPages}
+								page={vm.page}
 								onChange={(_, value) => {
-									const prevPage =
-										page;
-									if (
-										value === 1 &&
-										prevPage !== 1
-									) {
-										setScrollReveal(
-											Math.min(
-												perPage,
-												filtered.length,
-											),
-										);
-									}
-									goToPage(value);
+									vm.onPaginationChange(
+										value,
+									);
 								}}
 								color="primary"
 								shape="rounded"
 								size="large"
 								showFirstButton={
-									totalPages > 5
+									vm.totalPages > 5
 								}
 								showLastButton={
-									totalPages > 5
+									vm.totalPages > 5
 								}
 								sx={{
 									"& .MuiPaginationItem-root":
@@ -627,12 +406,10 @@ export function ActivitesClient({
 											fontWeight: 600,
 										},
 								}}
-								aria-label={`Pagination des activités, page ${page} sur ${totalPages}`}
+								aria-label={`Pagination des activités, page ${vm.page} sur ${vm.totalPages}`}
 							/>
 						</Stack>
-					) : page === 1 &&
-					  scrollReveal >= firstPageCap &&
-					  firstPageCap > scrollStep ? (
+					) : vm.showAllLoadedHint ? (
 						<Typography
 							variant="body2"
 							textAlign="center"

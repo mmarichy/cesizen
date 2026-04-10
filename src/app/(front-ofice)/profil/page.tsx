@@ -1,8 +1,10 @@
 import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
-import { authOptions } from "@/lib/auth-options";
-import { prisma } from "@/lib/prisma";
+import { StatusType } from "@/app/generated/prisma";
 import { ProfilPage } from "@/components/profil/profil-page";
+import { authOptions } from "@/lib/auth-options";
+import { mapPrismaActivityToDto } from "@/lib/map-prisma-activity";
+import { prisma } from "@/lib/prisma";
 
 export default async function ProfilRoutePage() {
   const session = await getServerSession(authOptions);
@@ -25,6 +27,22 @@ export default async function ProfilRoutePage() {
     redirect("/auth/login?callbackUrl=/profil");
   }
 
+  const favoriteRows = await prisma.activityFavorite.findMany({
+    where: {
+      userId: session.user.id,
+      activity: {
+        status: StatusType.PUBLISHED,
+        archivedAt: null,
+      },
+    },
+    orderBy: { createdAt: "desc" },
+    include: { activity: true },
+  });
+
+  const favoriteActivities = favoriteRows.map((row) =>
+    mapPrismaActivityToDto(row.activity),
+  );
+
   return (
     <ProfilPage
       user={{
@@ -34,6 +52,7 @@ export default async function ProfilRoutePage() {
         createdAt: user.createdAt,
         role: user.role,
       }}
+      favoriteActivities={favoriteActivities}
     />
   );
 }

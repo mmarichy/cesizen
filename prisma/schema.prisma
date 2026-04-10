@@ -31,7 +31,6 @@ enum ActivityDuration {
   MIN_30
   MIN_45
   HOUR_1
-  OVER_1_HOUR
 }
 
 model User {

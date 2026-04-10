@@ -1,11 +1,8 @@
 "use client";
 
-import {
-	useEffect,
-	useRef,
-	useState,
-	useSyncExternalStore,
-} from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -14,10 +11,7 @@ import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { Heart } from "lucide-react";
-import type { Activity as ActivityItem } from "@/app/(front-ofice)/activites/data";
-
-const FADE_TRANSITION =
-	"opacity 0.55s ease-out, transform 0.55s ease-out";
+import type { Activity as ActivityItem } from "@/lib/activities";
 
 const difficultyChipSx = {
 	Facile: {
@@ -40,67 +34,42 @@ const difficultyChipSx = {
 	},
 } as const;
 
-const REDUCED_MOTION_QUERY =
-	"(prefers-reduced-motion: reduce)";
-
-function subscribePrefersReducedMotion(
-	callback: () => void,
-) {
-	const mq = window.matchMedia(REDUCED_MOTION_QUERY);
-	mq.addEventListener("change", callback);
-	return () =>
-		mq.removeEventListener("change", callback);
-}
-
-function getPrefersReducedMotionSnapshot() {
-	return window.matchMedia(REDUCED_MOTION_QUERY).matches;
-}
-
-function getPrefersReducedMotionServerSnapshot() {
-	return false;
-}
-
 export function ActivityCard({
 	activity,
+	isFavorite,
+	onFavoriteChange,
 }: {
 	activity: ActivityItem;
+	isFavorite: boolean;
+	onFavoriteChange?: (
+		nextFavorited: boolean,
+	) => void | Promise<void>;
 }) {
-	const [favori, setFavori] = useState(
-		Boolean(activity.defaultFavorite),
-	);
-	const prefersReducedMotion = useSyncExternalStore(
-		subscribePrefersReducedMotion,
-		getPrefersReducedMotionSnapshot,
-		getPrefersReducedMotionServerSnapshot,
-	);
-	const [intersectionRevealed, setIntersectionRevealed] =
-		useState(false);
-	const revealed =
-		prefersReducedMotion || intersectionRevealed;
-	const cardRef = useRef<HTMLDivElement | null>(null);
+	const { status } = useSession();
+	const router = useRouter();
+	const [pending, setPending] = useState(false);
 
-	useEffect(() => {
-		if (prefersReducedMotion) return;
+	const authenticated = status === "authenticated";
 
-		const el = cardRef.current;
-		if (!el) return;
-
-		const observer = new IntersectionObserver(
-			(entries) => {
-				const [entry] = entries;
-				if (!entry?.isIntersecting) return;
-				setIntersectionRevealed(true);
-				observer.disconnect();
-			},
-			{
-				rootMargin: "0px 0px -6% 0px",
-				threshold: 0,
-			},
-		);
-
-		observer.observe(el);
-		return () => observer.disconnect();
-	}, [activity.id, prefersReducedMotion]);
+	async function handleFavoriteClick() {
+		if (!authenticated) {
+			const path =
+				typeof window !== "undefined"
+					? `${window.location.pathname}${window.location.search}`
+					: "/activites";
+			router.push(
+				`/auth/login?callbackUrl=${encodeURIComponent(path)}`,
+			);
+			return;
+		}
+		if (!onFavoriteChange || pending) return;
+		setPending(true);
+		try {
+			await onFavoriteChange(!isFavorite);
+		} finally {
+			setPending(false);
+		}
+	}
 
 	const categoryChipSx = {
 		backgroundColor: activity.accentColor,
@@ -110,7 +79,6 @@ export function ActivityCard({
 
 	return (
 		<Card
-			ref={cardRef}
 			elevation={0}
 			component="article"
 			variant="outlined"
@@ -123,11 +91,8 @@ export function ActivityCard({
 				backgroundColor: "#fff",
 				boxShadow:
 					"0 1px 3px rgba(15, 23, 42, 0.08), 0 4px 12px rgba(15, 23, 42, 0.06)",
-				opacity: revealed ? 1 : 0,
-				transform: revealed
-					? "translateY(0)"
-					: "translateY(12px)",
-				transition: `${FADE_TRANSITION}, box-shadow 0.2s ease, border-color 0.2s ease`,
+				transition:
+					"box-shadow 0.2s ease, border-color 0.2s ease",
 				"&:hover": {
 					boxShadow:
 						"0 8px 24px rgba(15, 23, 42, 0.12), 0 4px 10px rgba(15, 23, 42, 0.08)",
@@ -147,7 +112,7 @@ export function ActivityCard({
 					alignItems="flex-start"
 					justifyContent="space-between"
 					gap={1}
-					sx={{ mb: 2 }}>
+					sx={{ mb: 2, minWidth: 0 }}>
 					<Typography
 						variant="h6"
 						component="h2"
@@ -158,29 +123,42 @@ export function ActivityCard({
 							fontSize: "1.125rem",
 							lineHeight: 1.35,
 							color: "#0f172a",
+							overflow: "hidden",
+							display: "-webkit-box",
+							WebkitBoxOrient: "vertical",
+							WebkitLineClamp: 2,
 						}}>
 						{activity.title}
 					</Typography>
 					<IconButton
 						size="small"
-						onClick={() => setFavori((v) => !v)}
-						aria-pressed={favori}
+						disabled={
+							authenticated &&
+							Boolean(onFavoriteChange) &&
+							pending
+						}
+						onClick={() => void handleFavoriteClick()}
+						aria-pressed={isFavorite}
 						aria-label={
-							favori
-								? "Retirer des favoris"
-								: "Ajouter aux favoris"
+							!authenticated
+								? "Se connecter pour ajouter aux favoris"
+								: isFavorite
+									? "Retirer des favoris"
+									: "Ajouter aux favoris"
 						}
 						sx={{
 							flexShrink: 0,
+							position: "relative",
+							zIndex: 1,
 							mt: -0.5,
 							mr: -0.5,
 							width: 40,
 							height: 40,
-							bgcolor: favori
+							bgcolor: isFavorite
 								? "#fecaca"
 								: "#f1f5f9",
 							"&:hover": {
-								bgcolor: favori
+								bgcolor: isFavorite
 									? "#fca5a5"
 									: "#e2e8f0",
 							},
@@ -188,14 +166,16 @@ export function ActivityCard({
 						<Heart
 							size={20}
 							color={
-								favori ? "#dc2626" : "#64748b"
+								isFavorite
+									? "#dc2626"
+									: "#475569"
 							}
 							fill={
-								favori
+								isFavorite
 									? "#dc2626"
 									: "transparent"
 							}
-							strokeWidth={2}
+							strokeWidth={2.25}
 							aria-hidden
 						/>
 					</IconButton>

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ActivitesClient } from "./activites-client";
-import { activities } from "./data";
 
 export const metadata: Metadata = {
 	title: "Activités de détente | Cesizen",
@@ -19,7 +18,7 @@ export default function ActivitesPage() {
 							Chargement…
 						</p>
 					}>
-					<ActivitesClient activities={activities} />
+					<ActivitesClient />
 				</Suspense>
 			</div>
 		</div>

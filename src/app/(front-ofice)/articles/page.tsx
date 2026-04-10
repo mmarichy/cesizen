@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ArticlesClient } from "./articles-client";
-import { articles } from "./data";
 
 export const metadata: Metadata = {
 	title: "Articles | Cesizen",
@@ -19,7 +18,7 @@ export default function ArticlesPage() {
 							Chargement…
 						</p>
 					}>
-					<ArticlesClient articles={articles} />
+					<ArticlesClient />
 				</Suspense>
 			</div>
 		</div>

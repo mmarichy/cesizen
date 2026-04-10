@@ -1,6 +1,8 @@
 "use client";
 
+import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
+import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import type { TextFieldProps } from "@mui/material/TextField";
@@ -25,6 +27,12 @@ export type SearchFieldProps = Pick<
   maxWidth?: number | string;
   /** Masquer l’icône loupe en début de champ. Défaut : `false`. */
   hideStartIcon?: boolean;
+  /** Affiche une croix pour vider le champ lorsque `value` n’est pas vide. */
+  showClearButton?: boolean;
+  /** Appelé au clic sur la croix (souvent vider la valeur côté parent / URL). */
+  onClear?: () => void;
+  /** Libellé accessible du bouton effacer. Défaut : « Effacer la recherche ». */
+  clearButtonAriaLabel?: string;
   sx?: TextFieldProps["sx"];
 };
 
@@ -36,9 +44,17 @@ export function SearchField({
   fullWidth = true,
   maxWidth = 560,
   hideStartIcon = false,
+  showClearButton = false,
+  onClear,
+  clearButtonAriaLabel = "Effacer la recherche",
   sx,
   ...rest
 }: SearchFieldProps) {
+  const showClear =
+    showClearButton &&
+    onClear !== undefined &&
+    value.length > 0;
+
   return (
     <TextField
       {...rest}
@@ -66,6 +82,32 @@ export function SearchField({
                   </InputAdornment>
                 ),
               }),
+          ...(showClear
+            ? {
+                endAdornment: (
+                  <InputAdornment
+                    position="end"
+                    sx={{ mr: 0.5 }}>
+                    <IconButton
+                      type="button"
+                      size="small"
+                      onClick={onClear}
+                      aria-label={clearButtonAriaLabel}
+                      edge="end"
+                      sx={{
+                        color: "grey.600",
+                        "&:hover": {
+                          color: "grey.900",
+                          backgroundColor:
+                            "rgba(15, 23, 42, 0.06)",
+                        },
+                      }}>
+                      <ClearIcon sx={{ fontSize: 20 }} />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }
+            : {}),
         },
       }}
       sx={{
