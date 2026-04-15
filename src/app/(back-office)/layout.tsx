@@ -36,7 +36,7 @@ export default async function BackOfficeLayout({
           <div className="mx-auto mt-8 max-w-3xl text-center sm:mt-10">
             <h1 className="mt-4 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">Administration</h1>
             <p className="mt-3 text-sm text-gray-600 sm:text-base">
-              Gerez les utilisateurs et les activites de la plateforme
+              Gérez les utilisateurs et les activités de la plateforme
             </p>
 
             <BackOfficeNav adminRoot="/admin" />
