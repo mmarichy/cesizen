@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import { formatFirstname, formatLastname } from "@/lib/format-person-name";
+import { normalizeFrenchPhone } from "@/lib/normalize-phone";
 import { prisma } from "@/lib/prisma";
 
 const MIN_PASSWORD = 8;
@@ -24,7 +25,7 @@ export async function POST(req: Request) {
     const lastNameRaw = body.lastName?.trim() ?? "";
     const firstName = formatFirstname(firstNameRaw);
     const lastName = formatLastname(lastNameRaw);
-    const phone = body.phone?.trim() || null;
+    const phone = normalizeFrenchPhone(body.phone);
 
     if (!email || !password || !firstNameRaw || !lastNameRaw) {
       return NextResponse.json({ error: "Tous les champs obligatoires doivent être remplis." }, { status: 400 });
