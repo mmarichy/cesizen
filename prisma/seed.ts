@@ -3,6 +3,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcrypt";
 
 import {
+  AdminAuditAction,
   ActivityDuration,
   DifficultyLevel,
   PrismaClient,
@@ -158,16 +159,22 @@ async function main() {
 
   const hashedPassword = await bcrypt.hash(plainPassword, 12);
 
-  await prisma.user.upsert({
+  const adminUser = await prisma.user.upsert({
     where: { email },
-    update: {},
+    update: {
+      firstname: "Admin",
+      lastname: "Cesizen",
+      phone: "+33612345678",
+      password: hashedPassword,
+      role: Role.USER,
+    },
     create: {
       email,
       firstname: "Admin",
       lastname: "Cesizen",
       phone: "+33612345678",
       password: hashedPassword,
-      role: Role.ADMIN,
+      role: Role.USER,
     },
   });
 
@@ -175,9 +182,15 @@ async function main() {
   const secondPlainPassword = "User123!";
   const secondHashedPassword = await bcrypt.hash(secondPlainPassword, 12);
 
-  await prisma.user.upsert({
+  const secondUser = await prisma.user.upsert({
     where: { email: secondEmail },
-    update: {},
+    update: {
+      firstname: "User",
+      lastname: "Cesizen",
+      phone: "+33698765432",
+      password: secondHashedPassword,
+      role: Role.USER,
+    },
     create: {
       email: secondEmail,
       firstname: "User",
@@ -186,6 +199,64 @@ async function main() {
       password: secondHashedPassword,
       role: Role.USER,
     },
+  });
+
+  const promotedAdminUser = await prisma.user.update({
+    where: { id: adminUser.id },
+    data: {
+      role: Role.ADMIN,
+    },
+  });
+
+  await prisma.adminAuditLog.deleteMany({
+    where: {
+      actorEmail: {
+        in: [email, secondEmail],
+      },
+      targetEmail: {
+        in: [email, secondEmail],
+      },
+    },
+  });
+
+  await prisma.adminAuditLog.createMany({
+    data: [
+      {
+        action: AdminAuditAction.USER_CREATED,
+        actorUserId: promotedAdminUser.id,
+        actorEmail: email,
+        targetUserId: adminUser.id,
+        targetEmail: email,
+        metadata: {
+          source: "seed",
+          role: "USER",
+        },
+      },
+      {
+        action: AdminAuditAction.USER_CREATED,
+        actorUserId: promotedAdminUser.id,
+        actorEmail: email,
+        targetUserId: secondUser.id,
+        targetEmail: secondEmail,
+        metadata: {
+          source: "seed",
+          role: "USER",
+        },
+      },
+      {
+        action: AdminAuditAction.USER_STATUS_CHANGED,
+        actorUserId: promotedAdminUser.id,
+        actorEmail: email,
+        targetUserId: adminUser.id,
+        targetEmail: email,
+        metadata: {
+          source: "seed",
+          field: "role",
+          from: "USER",
+          to: "ADMIN",
+        },
+      },
+    ],
   });
 
   for (const article of articleSeeds) {

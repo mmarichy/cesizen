@@ -14,6 +14,17 @@ enum Role {
   ADMIN
 }
 
+enum UserStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum AdminAuditAction {
+  USER_CREATED
+  USER_STATUS_CHANGED
+  USER_DELETED
+}
+
 enum StatusType {
   DRAFT
   PUBLISHED
@@ -41,6 +52,7 @@ model User {
   phone             String?
   password          String
   role              Role               @default(USER)
+  status            UserStatus         @default(ACTIVE)
   activityFavorites ActivityFavorite[]
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
@@ -87,4 +99,18 @@ model ActivityFavorite {
 
   @@id([userId, activityId])
   @@index([activityId])
+}
+
+model AdminAuditLog {
+  id            String           @id @default(cuid())
+  action        AdminAuditAction
+  actorUserId   String
+  actorEmail    String
+  targetUserId  String
+  targetEmail   String?
+  metadata      Json?
+  createdAt     DateTime         @default(now())
+
+  @@index([action, createdAt])
+  @@index([targetUserId, createdAt])
 }

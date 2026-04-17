@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import { formatFirstname, formatLastname } from "@/lib/format-person-name";
+import { isValidFrenchPhone, normalizeFrenchPhone } from "@/lib/normalize-phone";
 import { prisma } from "@/lib/prisma";
 
 const MIN_PASSWORD = 8;
@@ -24,10 +25,17 @@ export async function POST(req: Request) {
     const lastNameRaw = body.lastName?.trim() ?? "";
     const firstName = formatFirstname(firstNameRaw);
     const lastName = formatLastname(lastNameRaw);
-    const phone = body.phone?.trim() || null;
+    const phone = normalizeFrenchPhone(body.phone);
 
     if (!email || !password || !firstNameRaw || !lastNameRaw) {
       return NextResponse.json({ error: "Tous les champs obligatoires doivent être remplis." }, { status: 400 });
+    }
+
+    if (!isValidFrenchPhone(phone)) {
+      return NextResponse.json(
+        { error: "Le numéro de téléphone doit être au format français valide (+33XXXXXXXXX)." },
+        { status: 400 },
+      );
     }
 
     if (password.length < MIN_PASSWORD) {

@@ -23,18 +23,18 @@ export default async function BackOfficeLayout({
 
   return (
     <div
-      className="min-h-screen pb-10"
+      className="min-h-screen pb-8 sm:pb-10"
       style={{
         background:
           "linear-gradient(135deg, #FFFBEB 0%, #FFF7ED 50%, #FEFCE8 100%)",
       }}
     >
-      <main className="mx-auto w-full max-w-6xl px-4 pt-2 pb-10">
-        <div className="relative px-4 pb-10 pt-4 sm:px-6 sm:pb-12 sm:pt-5">
+      <main className="mx-auto w-full max-w-6xl px-3 pt-2 pb-28 sm:px-4 sm:pb-10">
+        <div className="relative px-0 pb-8 pt-3 sm:px-6 sm:pb-12 sm:pt-5">
           <BackOfficeHeader adminName={adminName} />
 
-          <div className="mx-auto mt-8 max-w-3xl text-center sm:mt-10">
-            <h1 className="mt-4 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">Administration</h1>
+          <div className="mx-auto mt-6 max-w-3xl text-center sm:mt-10">
+            <h1 className="mt-3 text-3xl font-bold tracking-tight text-gray-900 sm:mt-4 sm:text-5xl">Administration</h1>
             <p className="mt-3 text-sm text-gray-600 sm:text-base">
               Gérez les utilisateurs et les activités de la plateforme
             </p>
@@ -42,7 +42,7 @@ export default async function BackOfficeLayout({
             <BackOfficeNav adminRoot="/admin" />
           </div>
         </div>
-        <section className="mt-8">{children}</section>
+        <section className="mt-6 sm:mt-8">{children}</section>
       </main>
     </div>
   );

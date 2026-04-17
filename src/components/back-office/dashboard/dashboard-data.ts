@@ -39,7 +39,7 @@ export const dashboardQuickActions = [
     title: "Ajouter un utilisateur",
     description: "Créer un nouveau compte",
     icon: UserPlus,
-    href: "/admin/users",
+    href: "/admin/users?createUser=1",
     containerClassName: "border-blue-100 bg-blue-50",
     iconClassName: "text-blue-600",
   },
