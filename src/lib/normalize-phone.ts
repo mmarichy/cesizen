@@ -21,3 +21,11 @@ export function normalizeFrenchPhone(phone?: string) {
 
   return compact;
 }
+
+export function isValidFrenchPhone(phone: string | null) {
+  if (!phone) {
+    return true;
+  }
+
+  return /^\+33[1-9]\d{8}$/.test(phone);
+}

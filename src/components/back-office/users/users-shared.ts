@@ -47,3 +47,16 @@ export function toggleButtonClassName(isActive: boolean) {
     ? "bg-red-500 text-white shadow-[0_10px_20px_rgba(239,68,68,0.25)] hover:bg-red-600"
     : "bg-emerald-500 text-white shadow-[0_10px_20px_rgba(16,185,129,0.25)] hover:bg-emerald-600";
 }
+
+export function formatCreatedAtDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "-";
+  }
+
+  return new Intl.DateTimeFormat("fr-FR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
+}
