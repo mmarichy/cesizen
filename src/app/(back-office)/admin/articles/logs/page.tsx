@@ -9,30 +9,46 @@ import { PaginationControls } from "@/components/ui/pagination-controls";
 
 export const dynamic = "force-dynamic";
 const LOGS_PAGE_SIZE = 20;
-const USER_LOG_ACTIONS: AdminAuditAction[] = ["USER_CREATED", "USER_STATUS_CHANGED", "USER_DELETED"];
+const ARTICLE_LOG_ACTIONS: AdminAuditAction[] = ["ARTICLE_CREATED", "ARTICLE_UPDATED", "ARTICLE_STATUS_CHANGED", "ARTICLE_DELETED"];
 
 function actionLabel(action: string) {
-  if (action === "USER_CREATED") {
-    return "Création utilisateur";
+  if (action === "ARTICLE_CREATED") {
+    return "Création article";
   }
 
-  if (action === "USER_STATUS_CHANGED") {
-    return "Mise à jour utilisateur";
+  if (action === "ARTICLE_UPDATED") {
+    return "Mise à jour article";
   }
 
-  return "Suppression utilisateur";
+  if (action === "ARTICLE_STATUS_CHANGED") {
+    return "Mise à jour article";
+  }
+
+  if (action === "ARTICLE_DELETED") {
+    return "Suppression article";
+  }
+
+  return action;
 }
 
 function actionBadgeClassName(action: string) {
-  if (action === "USER_CREATED") {
+  if (action === "ARTICLE_CREATED") {
     return "border border-emerald-100 bg-emerald-50 text-emerald-700";
   }
 
-  if (action === "USER_STATUS_CHANGED") {
+  if (action === "ARTICLE_UPDATED") {
     return "border border-amber-100 bg-amber-50 text-amber-700";
   }
 
-  return "border border-red-100 bg-red-50 text-red-700";
+  if (action === "ARTICLE_STATUS_CHANGED") {
+    return "border border-amber-100 bg-amber-50 text-amber-700";
+  }
+
+  if (action === "ARTICLE_DELETED") {
+    return "border border-red-100 bg-red-50 text-red-700";
+  }
+
+  return "border border-gray-200 bg-gray-50 text-gray-700";
 }
 
 function roleLabel(value: unknown) {
@@ -59,6 +75,15 @@ function statusLabel(value: unknown) {
     }
     if (normalized === "DISABLED") {
       return "Inactif";
+    }
+    if (normalized === "PUBLISHED") {
+      return "Publié";
+    }
+    if (normalized === "ARCHIVED") {
+      return "Archivé";
+    }
+    if (normalized === "DRAFT") {
+      return "Brouillon";
     }
   }
 
@@ -132,7 +157,7 @@ function formatDateTime(value: Date) {
   }).format(value);
 }
 
-export default async function AdminUsersLogsPage({
+export default async function AdminArticleLogsPage({
   searchParams,
 }: {
   searchParams?: Promise<{ page?: string }>;
@@ -155,7 +180,7 @@ export default async function AdminUsersLogsPage({
 
   const where = {
     action: {
-      in: USER_LOG_ACTIONS,
+      in: ARTICLE_LOG_ACTIONS,
     },
   };
 
@@ -177,15 +202,15 @@ export default async function AdminUsersLogsPage({
     <div className="space-y-6 sm:space-y-8">
       <section className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">Logs utilisateurs</h2>
+          <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">Logs articles</h2>
           <p className="mt-2 text-sm text-gray-600">
-            Historique des créations, suppressions et changements de statut.
+            Historique des créations, mises à jour, changements de statut et suppressions.
           </p>
         </div>
 
         <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
           <form
-            action="/api/admin/users/logs/export"
+            action="/api/admin/articles/logs/export"
             method="get"
             className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center"
           >
@@ -209,10 +234,10 @@ export default async function AdminUsersLogsPage({
           </form>
 
           <Link
-            href="/admin/users"
+            href="/admin/articles"
             className="inline-flex w-full items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 no-underline transition hover:bg-gray-50 sm:w-auto"
           >
-            Retour à la gestion des utilisateurs
+            Retour à la gestion des articles
           </Link>
         </div>
       </section>
@@ -224,8 +249,8 @@ export default async function AdminUsersLogsPage({
           totalPages={totalPages}
           isPreviousDisabled={currentPage <= 1}
           isNextDisabled={currentPage >= totalPages}
-          previousHref={`/admin/users/logs?page=${Math.max(1, currentPage - 1)}`}
-          nextHref={`/admin/users/logs?page=${Math.min(totalPages, currentPage + 1)}`}
+          previousHref={`/admin/articles/logs?page=${Math.max(1, currentPage - 1)}`}
+          nextHref={`/admin/articles/logs?page=${Math.min(totalPages, currentPage + 1)}`}
           className="mb-6 flex flex-col gap-3 border-b border-gray-100 pb-4 sm:flex-row sm:items-center sm:justify-between"
         />
 
@@ -236,89 +261,131 @@ export default async function AdminUsersLogsPage({
         ) : (
           <>
             <div className="space-y-3 md:hidden">
-              {logs.map((log) => (
-                <article key={log.id} className="rounded-2xl border border-gray-200 p-4 shadow-xs">
-                  <div className="flex items-start justify-between gap-2">
+              {logs.map((log) => {
+                const detailsLines = formatMetadataDetails(log.metadata);
+                return (
+                <article key={log.id} className="min-w-0 overflow-hidden rounded-2xl border border-gray-200 p-4 shadow-xs">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <span
+                        title={actionLabel(log.action)}
+                        className={[
+                          "inline-block max-w-full truncate rounded-full px-3 py-1 text-xs font-semibold align-middle",
+                          actionBadgeClassName(log.action),
+                        ].join(" ")}
+                      >
+                        {actionLabel(log.action)}
+                      </span>
+                    </div>
                     <span
-                      className={[
-                        "inline-flex rounded-full px-3 py-1 text-xs font-semibold",
-                        actionBadgeClassName(log.action),
-                      ].join(" ")}
+                      className="shrink-0 truncate text-xs text-gray-500"
+                      title={formatDateTime(log.createdAt)}
                     >
-                      {actionLabel(log.action)}
-                    </span>
-                    <span className="text-xs text-gray-500">
                       {formatDateTime(log.createdAt)}
                     </span>
                   </div>
 
                   <div className="mt-3 space-y-2 text-sm">
-                    <p className="text-gray-700">
-                      <span className="font-semibold text-gray-900">Acteur: </span>
-                      <span className="break-all">{log.actorEmail || log.actorUserId || "-"}</span>
+                    <p className="flex min-w-0 gap-1 text-gray-700">
+                      <span className="shrink-0 font-semibold text-gray-900">Acteur: </span>
+                      <span
+                        className="min-w-0 truncate"
+                        title={log.actorEmail || log.actorUserId || "-"}
+                      >
+                        {log.actorEmail || log.actorUserId || "-"}
+                      </span>
                     </p>
-                    <p className="text-gray-700">
-                      <span className="font-semibold text-gray-900">Cible: </span>
-                      <span className="break-all">{log.targetEmail || log.targetUserId || "-"}</span>
+                    <p className="flex min-w-0 gap-1 text-gray-700">
+                      <span className="shrink-0 font-semibold text-gray-900">Cible: </span>
+                      <span
+                        className="min-w-0 truncate"
+                        title={log.targetEmail || log.targetUserId || "-"}
+                      >
+                        {log.targetEmail || log.targetUserId || "-"}
+                      </span>
                     </p>
-                    <p className="text-gray-700">
-                      <span className="font-semibold text-gray-900">Détails: </span>
-                      <span className="text-gray-600">
-                        {formatMetadataDetails(log.metadata).map((detail, index) => (
-                          <span key={detail}>
-                            {index > 0 ? " | " : ""}
-                            <span className="break-all">{detail}</span>
-                          </span>
-                        ))}
+                    <p className="flex min-w-0 gap-1 text-gray-700">
+                      <span className="shrink-0 font-semibold text-gray-900">Détails: </span>
+                      <span
+                        className="min-w-0 truncate text-gray-600"
+                        title={detailsLines.join(" · ")}
+                      >
+                        {detailsLines.join(" · ")}
                       </span>
                     </p>
                   </div>
                 </article>
-              ))}
+                );
+              })}
             </div>
 
             <div className="hidden overflow-x-auto md:block">
               <table className="min-w-full table-fixed border-separate border-spacing-0">
                 <thead>
                   <tr className="text-sm font-semibold text-gray-700">
-                    <th className="w-52 px-4 py-3 text-left">Action</th>
-                    <th className="w-64 px-4 py-3 text-left">Acteur</th>
-                    <th className="w-64 px-4 py-3 text-left">Cible</th>
-                    <th className="w-64 px-4 py-3 text-left">Détails</th>
-                    <th className="w-44 px-4 py-3 text-left">Date</th>
+                    <th className="w-52 px-4 py-4 text-left">Action</th>
+                    <th className="w-64 px-4 py-4 text-left">Acteur</th>
+                    <th className="w-64 px-4 py-4 text-left">Cible</th>
+                    <th className="w-64 px-4 py-4 text-left">Détails</th>
+                    <th className="w-44 px-4 py-4 text-left">Date</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {logs.map((log) => (
-                    <tr key={log.id} className="border-t border-gray-100 align-top">
-                      <td className="px-4 py-4 text-sm">
+                  {logs.map((log) => {
+                    const targetLabel = log.targetEmail || log.targetUserId || "-";
+                    return (
+                    <tr key={log.id} className="border-t border-gray-100">
+                      <td className="min-w-0 max-w-0 overflow-hidden px-4 py-5 text-sm align-middle">
                         <span
+                          title={actionLabel(log.action)}
                           className={[
-                            "inline-flex rounded-full px-3 py-1 text-xs font-semibold",
+                            "block max-w-full truncate rounded-full px-3 py-1 text-xs font-semibold",
                             actionBadgeClassName(log.action),
                           ].join(" ")}
                         >
                           {actionLabel(log.action)}
                         </span>
                       </td>
-                      <td className="px-4 py-4 text-sm text-gray-700">
-                        {log.actorEmail || log.actorUserId}
+                      <td className="min-w-0 max-w-0 overflow-hidden px-4 py-5 text-sm text-gray-700 align-middle">
+                        <p
+                          className="truncate"
+                          title={log.actorEmail || log.actorUserId || "-"}
+                        >
+                          {log.actorEmail || log.actorUserId || "-"}
+                        </p>
                       </td>
-                      <td className="px-4 py-4 text-sm text-gray-700">
-                        {log.targetEmail || log.targetUserId}
+                      <td className="min-w-0 max-w-0 overflow-hidden px-4 py-5 text-sm text-gray-700 align-middle">
+                        <p
+                          className="truncate"
+                          title={targetLabel}
+                        >
+                          {targetLabel}
+                        </p>
                       </td>
-                      <td className="px-4 py-4 text-sm text-gray-600">
-                        {formatMetadataDetails(log.metadata).map((detail) => (
-                          <p key={detail} className="break-all">
-                            {detail}
-                          </p>
-                        ))}
+                      <td className="min-w-0 max-w-0 overflow-hidden px-4 py-5 text-sm text-gray-600 align-middle">
+                        <div className="min-w-0 space-y-1">
+                          {formatMetadataDetails(log.metadata).map((detail, index) => (
+                            <p
+                              key={`${log.id}-detail-${index}`}
+                              className="truncate"
+                              title={detail}
+                            >
+                              {detail}
+                            </p>
+                          ))}
+                        </div>
                       </td>
-                      <td className="px-4 py-4 text-sm text-gray-600">
-                        {formatDateTime(log.createdAt)}
+                      <td className="min-w-0 max-w-0 overflow-hidden px-4 py-5 text-sm text-gray-600 align-middle">
+                        <p
+                          className="truncate"
+                          title={formatDateTime(log.createdAt)}
+                        >
+                          {formatDateTime(log.createdAt)}
+                        </p>
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

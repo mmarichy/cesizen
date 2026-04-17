@@ -89,7 +89,7 @@ export function UsersTable({
                       {formatPhoneNumber(user.phone)}
                     </span>
                   </td>
-                  <td className="px-3 py-5 text-center">
+                  <td className="px-3 py-5 text-sm text-center">
                     <span
                       className={[
                         "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold",
@@ -99,7 +99,7 @@ export function UsersTable({
                       {user.role}
                     </span>
                   </td>
-                  <td className="px-3 py-5 text-center">
+                  <td className="px-3 py-5 text-sm text-center">
                     <span
                       className={[
                         "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold",
@@ -109,10 +109,10 @@ export function UsersTable({
                       {user.status}
                     </span>
                   </td>
-                  <td className="px-3 py-5 text-center text-sm text-gray-600 whitespace-nowrap">
+                  <td className="px-3 py-5 text-sm text-center text-gray-600 whitespace-nowrap">
                     {formatCreatedAtDate(user.createdAt)}
                   </td>
-                  <td className="px-3 py-5">
+                  <td className="px-3 py-5 text-sm">
                     <div className="flex flex-wrap items-center justify-end gap-2">
                       <button
                         type="button"

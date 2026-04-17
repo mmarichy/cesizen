@@ -4,18 +4,31 @@ import { type AdminAuditAction } from "@/app/generated/prisma";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 
-const USER_LOG_ACTIONS: AdminAuditAction[] = ["USER_CREATED", "USER_STATUS_CHANGED", "USER_DELETED"];
+const ARTICLE_LOG_ACTIONS: AdminAuditAction[] = [
+  "ARTICLE_CREATED",
+  "ARTICLE_UPDATED",
+  "ARTICLE_STATUS_CHANGED",
+  "ARTICLE_DELETED",
+];
 
 function actionLabel(action: string) {
-  if (action === "USER_CREATED") {
-    return "Creation utilisateur";
+  if (action === "ARTICLE_CREATED") {
+    return "Creation article";
   }
 
-  if (action === "USER_STATUS_CHANGED") {
-    return "Mise a jour utilisateur";
+  if (action === "ARTICLE_UPDATED") {
+    return "Mise a jour article";
   }
 
-  return "Suppression utilisateur";
+  if (action === "ARTICLE_STATUS_CHANGED") {
+    return "Changement de statut article";
+  }
+
+  if (action === "ARTICLE_DELETED") {
+    return "Suppression article";
+  }
+
+  return action;
 }
 
 function roleLabel(value: unknown) {
@@ -42,6 +55,15 @@ function statusLabel(value: unknown) {
     }
     if (normalized === "DISABLED") {
       return "Inactif";
+    }
+    if (normalized === "PUBLISHED") {
+      return "Publie";
+    }
+    if (normalized === "ARCHIVED") {
+      return "Archive";
+    }
+    if (normalized === "DRAFT") {
+      return "Brouillon";
     }
   }
 
@@ -148,7 +170,7 @@ export async function GET(request: Request) {
     const where = {
       ...dateFilter,
       action: {
-        in: USER_LOG_ACTIONS,
+        in: ARTICLE_LOG_ACTIONS,
       },
     };
 
@@ -172,7 +194,7 @@ export async function GET(request: Request) {
       .join("\n");
 
     const periodSuffix = period === "7d" ? "7j" : period === "all" ? "all" : "30j";
-    const filename = `logs-utilisateurs-${periodSuffix}-${new Date().toISOString().slice(0, 10)}.csv`;
+    const filename = `logs-articles-${periodSuffix}-${new Date().toISOString().slice(0, 10)}.csv`;
 
     return new NextResponse(`\uFEFF${csvContent}`, {
       headers: {
@@ -182,9 +204,9 @@ export async function GET(request: Request) {
       },
     });
   } catch (error) {
-    console.error("Erreur export logs utilisateurs:", error);
+    console.error("Erreur export logs articles:", error);
     return NextResponse.json(
-      { message: "Impossible d'exporter les logs utilisateurs" },
+      { message: "Impossible d'exporter les logs articles" },
       { status: 500 },
     );
   }
