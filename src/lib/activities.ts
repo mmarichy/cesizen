@@ -32,6 +32,25 @@ export const activityDifficulties: ActivityDifficulty[] = [
 	"Difficile",
 ];
 
+/** Pastel + texte foncé, identique aux puces des cartes activité (liste / détail). */
+export const activityDifficultyChipStyle: Record<
+	ActivityDifficulty,
+	{ backgroundColor: string; color: string }
+> = {
+	Facile: {
+		backgroundColor: "#dcfce7",
+		color: "#166534",
+	},
+	Moyen: {
+		backgroundColor: "#fef9c3",
+		color: "#854d0e",
+	},
+	Difficile: {
+		backgroundColor: "#fee2e2",
+		color: "#991b1b",
+	},
+};
+
 /** Valeur du filtre durée (minutes, aligné sur l’API). */
 export type ActivityDurationFilter = 15 | 30 | 45 | 60;
 

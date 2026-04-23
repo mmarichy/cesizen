@@ -12,7 +12,7 @@ const markdownComponents: Components = {
 		</h1>
 	),
 	h2: ({ children }) => (
-		<h2 className="mt-8 border-b border-slate-200 pb-2 text-2xl font-bold text-slate-900 sm:text-[1.75rem]">
+		<h2 className="mt-8 border-b border-slate-200 pb-8 text-2xl font-bold text-slate-900 first:mt-0 sm:text-[1.75rem]">
 			{children}
 		</h2>
 	),

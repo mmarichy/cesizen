@@ -41,6 +41,42 @@
   animation: fadeIn 1s ease-in-out;
 }
 
+@keyframes favorite-heart-pop {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.38);
+  }
+  60% {
+    transform: scale(0.94);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes favorite-heart-release {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(0.82);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-favorite-heart-pop {
+  animation: favorite-heart-pop 0.55s cubic-bezier(0.34, 1.45, 0.64, 1)
+    forwards;
+}
+
+.animate-favorite-heart-release {
+  animation: favorite-heart-release 0.38s ease-out forwards;
+}
+
 /* Tailles de police du corps d’article (Markdown + balises HTML autorisées) */
 .article-markdown small {
   font-size: 0.875em;

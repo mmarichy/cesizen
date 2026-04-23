@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
@@ -11,28 +10,11 @@ import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { Heart } from "lucide-react";
-import type { Activity as ActivityItem } from "@/lib/activities";
-
-const difficultyChipSx = {
-	Facile: {
-		backgroundColor: "#dcfce7",
-		color: "#166534",
-		fontWeight: 600,
-		border: "none",
-	},
-	Moyen: {
-		backgroundColor: "#fef9c3",
-		color: "#854d0e",
-		fontWeight: 600,
-		border: "none",
-	},
-	Difficile: {
-		backgroundColor: "#fee2e2",
-		color: "#991b1b",
-		fontWeight: 600,
-		border: "none",
-	},
-} as const;
+import { activityFavoriteIconButtonSx } from "@/lib/activity-favorite-ui";
+import {
+	activityDifficultyChipStyle,
+	type Activity as ActivityItem,
+} from "@/lib/activities";
 
 export function ActivityCard({
 	activity,
@@ -43,13 +25,29 @@ export function ActivityCard({
 	isFavorite: boolean;
 	onFavoriteChange?: (
 		nextFavorited: boolean,
-	) => void | Promise<void>;
+	) => boolean | Promise<boolean>;
 }) {
 	const { status } = useSession();
 	const router = useRouter();
 	const [pending, setPending] = useState(false);
+	const [heartMotion, setHeartMotion] = useState<
+		null | "pop" | "release"
+	>(null);
 
 	const authenticated = status === "authenticated";
+
+	const detailHref = `/activites/${String(activity.id)}`;
+
+	function openDetail() {
+		router.push(detailHref);
+	}
+
+	function handleCardKeyDown(e: KeyboardEvent) {
+		if (e.key === "Enter" || e.key === " ") {
+			e.preventDefault();
+			openDetail();
+		}
+	}
 
 	async function handleFavoriteClick() {
 		if (!authenticated) {
@@ -63,9 +61,15 @@ export function ActivityCard({
 			return;
 		}
 		if (!onFavoriteChange || pending) return;
+		const nextFavorited = !isFavorite;
 		setPending(true);
 		try {
-			await onFavoriteChange(!isFavorite);
+			const ok = await onFavoriteChange(nextFavorited);
+			if (ok) {
+				setHeartMotion(
+					nextFavorited ? "pop" : "release",
+				);
+			}
 		} finally {
 			setPending(false);
 		}
@@ -82,6 +86,10 @@ export function ActivityCard({
 			elevation={0}
 			component="article"
 			variant="outlined"
+			tabIndex={0}
+			aria-label={`Ouvrir l’activité « ${activity.title} »`}
+			onClick={openDetail}
+			onKeyDown={handleCardKeyDown}
 			sx={{
 				height: "100%",
 				display: "flex",
@@ -89,6 +97,7 @@ export function ActivityCard({
 				borderRadius: "1.25rem",
 				borderColor: "grey.300",
 				backgroundColor: "#fff",
+				cursor: "pointer",
 				boxShadow:
 					"0 1px 3px rgba(15, 23, 42, 0.08), 0 4px 12px rgba(15, 23, 42, 0.06)",
 				transition:
@@ -97,6 +106,10 @@ export function ActivityCard({
 					boxShadow:
 						"0 8px 24px rgba(15, 23, 42, 0.12), 0 4px 10px rgba(15, 23, 42, 0.08)",
 					borderColor: "grey.400",
+				},
+				"&:focus-visible": {
+					outline: "2px solid #0f766e",
+					outlineOffset: 2,
 				},
 			}}>
 			<CardContent
@@ -137,7 +150,10 @@ export function ActivityCard({
 							Boolean(onFavoriteChange) &&
 							pending
 						}
-						onClick={() => void handleFavoriteClick()}
+						onClick={(e) => {
+							e.stopPropagation();
+							void handleFavoriteClick();
+						}}
 						aria-pressed={isFavorite}
 						aria-label={
 							!authenticated
@@ -147,37 +163,53 @@ export function ActivityCard({
 									: "Ajouter aux favoris"
 						}
 						sx={{
+							...activityFavoriteIconButtonSx(isFavorite),
 							flexShrink: 0,
 							position: "relative",
 							zIndex: 1,
 							mt: -0.5,
 							mr: -0.5,
-							width: 40,
-							height: 40,
-							bgcolor: isFavorite
-								? "#fecaca"
-								: "#f1f5f9",
-							"&:hover": {
-								bgcolor: isFavorite
-									? "#fca5a5"
-									: "#e2e8f0",
+							width: 42,
+							height: 42,
+							"& .activity-card-favorite-heart-wrap": {
+								display: "inline-flex",
+								transition:
+									"transform 0.2s ease-out",
 							},
+							"&:hover .activity-card-favorite-heart-wrap":
+								{
+									transform: "scale(1.1)",
+								},
+							"&:active .activity-card-favorite-heart-wrap":
+								{
+									transform: "scale(0.95)",
+								},
 						}}>
-						<Heart
-							size={20}
-							color={
-								isFavorite
-									? "#dc2626"
-									: "#475569"
+						<span
+							className={
+								heartMotion === "pop"
+									? "animate-favorite-heart-pop inline-flex leading-none"
+									: heartMotion === "release"
+										? "animate-favorite-heart-release inline-flex leading-none"
+										: "inline-flex leading-none"
 							}
-							fill={
-								isFavorite
-									? "#dc2626"
-									: "transparent"
-							}
-							strokeWidth={2.25}
-							aria-hidden
-						/>
+							onAnimationEnd={() => {
+								setHeartMotion(null);
+							}}>
+							<span className="activity-card-favorite-heart-wrap inline-flex leading-none">
+								<Heart
+									size={20}
+									color="currentColor"
+									fill={
+										isFavorite
+											? "currentColor"
+											: "transparent"
+									}
+									strokeWidth={2.25}
+									aria-hidden
+								/>
+							</span>
+						</span>
 					</IconButton>
 				</Stack>
 
@@ -198,9 +230,11 @@ export function ActivityCard({
 						size="small"
 						label={activity.difficulty}
 						sx={{
-							...difficultyChipSx[
+							...activityDifficultyChipStyle[
 								activity.difficulty
 							],
+							fontWeight: 600,
+							border: "none",
 							padding: "3px 6px",
 						}}
 					/>
@@ -221,52 +255,12 @@ export function ActivityCard({
 					{activity.description}
 				</Typography>
 
-				<Stack
-					direction="row"
-					alignItems="center"
-					justifyContent="space-between"
-					sx={{ mt: 3, gap: 1.5 }}>
-					<Typography
-						variant="body2"
-						fontWeight={600}
-						sx={{ color: "#334155" }}>
-						{activity.durationMinutes} minutes
-					</Typography>
-					<Box
-						component="button"
-						type="button"
-						sx={{
-							display: "inline-flex",
-							alignItems: "center",
-							justifyContent: "center",
-							flexShrink: 0,
-							border: "none",
-							borderRadius: 9999,
-							cursor: "pointer",
-							fontWeight: 700,
-							fontSize: "0.875rem",
-							fontFamily: "inherit",
-							px: 2.25,
-							py: 1,
-							color: "#fff",
-							bgcolor: "#1e293b",
-							boxShadow:
-								"0 1px 3px rgba(15, 23, 42, 0.2)",
-							transition:
-								"background-color 0.2s, box-shadow 0.2s",
-							"&:hover": {
-								bgcolor: "#0f172a",
-								boxShadow:
-									"0 4px 12px rgba(15, 23, 42, 0.2)",
-							},
-							"&:focus-visible": {
-								outline: "2px solid #1e293b",
-								outlineOffset: 2,
-							},
-						}}>
-						Commencer
-					</Box>
-				</Stack>
+				<Typography
+					variant="body2"
+					fontWeight={600}
+					sx={{ mt: 3, color: "#334155" }}>
+					{activity.durationMinutes} minutes
+				</Typography>
 			</CardContent>
 		</Card>
 	);

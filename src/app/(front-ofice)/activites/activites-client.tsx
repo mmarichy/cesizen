@@ -83,11 +83,14 @@ export function ActivitesClient({
 	}, [userId]);
 
 	const toggleFavorite = useCallback(
-		async (activityId: string, next: boolean) => {
+		async (
+			activityId: string,
+			next: boolean,
+		): Promise<boolean> => {
 			try {
 				if (next) {
 					const response = await fetch(
-										"/api/account/activity-favorites",
+						"/api/account/activity-favorites",
 						{
 							method: "POST",
 							headers: {
@@ -107,24 +110,27 @@ export function ActivitesClient({
 								return n;
 							});
 						});
+						return true;
 					}
-				} else {
-					const response = await fetch(
-						`/api/account/activity-favorites?activityId=${encodeURIComponent(activityId)}`,
-						{ method: "DELETE" },
-					);
-					if (response.ok) {
-						startTransition(() => {
-							setFavoriteIds((prev) => {
-								const n = new Set(prev);
-								n.delete(activityId);
-								return n;
-							});
-						});
-					}
+					return false;
 				}
+				const response = await fetch(
+					`/api/account/activity-favorites?activityId=${encodeURIComponent(activityId)}`,
+					{ method: "DELETE" },
+				);
+				if (response.ok) {
+					startTransition(() => {
+						setFavoriteIds((prev) => {
+							const n = new Set(prev);
+							n.delete(activityId);
+							return n;
+						});
+					});
+					return true;
+				}
+				return false;
 			} catch {
-				/* ignore */
+				return false;
 			}
 		},
 		[],
