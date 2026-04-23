@@ -64,18 +64,24 @@ export function ProfilFavoritesGrid({
 	}, [filteredActivities, page]);
 
 	const removeFavorite = useCallback(
-		async (activityId: string) => {
-			const response = await fetch(
-				`/api/account/activity-favorites?activityId=${encodeURIComponent(activityId)}`,
-				{ method: "DELETE" },
-			);
-			if (response.ok) {
-				setActivities((prev) =>
-					prev.filter(
-						(a) => String(a.id) !== activityId,
-					),
+		async (activityId: string): Promise<boolean> => {
+			try {
+				const response = await fetch(
+					`/api/account/activity-favorites?activityId=${encodeURIComponent(activityId)}`,
+					{ method: "DELETE" },
 				);
-				router.refresh();
+				if (response.ok) {
+					setActivities((prev) =>
+						prev.filter(
+							(a) => String(a.id) !== activityId,
+						),
+					);
+					router.refresh();
+					return true;
+				}
+				return false;
+			} catch {
+				return false;
 			}
 		},
 		[router],
@@ -128,12 +134,13 @@ export function ProfilFavoritesGrid({
 									next,
 								) => {
 									if (!next) {
-										await removeFavorite(
+										return removeFavorite(
 											String(
 												activity.id,
 											),
 										);
 									}
+									return false;
 								}}
 							/>
 						</div>
