@@ -10,6 +10,7 @@ import {
 } from "@/app/generated/prisma";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
+import { ActivityCreatePreviewButton } from "@/components/back-office/activities/activity-create-preview-button";
 import { ActivityDescriptionField } from "@/components/back-office/activities/activity-description-field";
 import { ActivityTitleField } from "@/components/back-office/activities/activity-title-field";
 import { ArticleContentField } from "@/components/back-office/articles/article-content-field";
@@ -366,16 +367,7 @@ Bloc de code
             >
               Annuler
             </Link>
-            <button
-              type="submit"
-              formAction="/admin/activities/preview/new"
-              formMethod="get"
-              formTarget="_blank"
-              formNoValidate
-              className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 sm:min-w-40"
-            >
-              Aperçu
-            </button>
+            <ActivityCreatePreviewButton formId="create-activity-form" />
             <button
               type="submit"
               className="inline-flex items-center justify-center rounded-xl bg-linear-to-r from-amber-400 to-orange-500 px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_25px_rgba(249,115,22,0.3)] transition hover:brightness-105 sm:min-w-40"

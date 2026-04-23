@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
+import { TriangleAlert } from "lucide-react";
 
 type UnsavedFormGuardProps = {
   formId: string;
@@ -28,22 +29,26 @@ export function UnsavedFormGuard({
   formId,
   message = "Vous avez des modifications non sauvegardées. Voulez-vous vraiment quitter cette page ?",
 }: UnsavedFormGuardProps) {
+  const isSubmittingRef = useRef(false);
+  const isDirtyRef = useRef(false);
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
+
   useEffect(() => {
     const form = document.getElementById(formId);
     if (!(form instanceof HTMLFormElement)) {
       return;
     }
 
-    let isSubmitting = false;
-    let isDirty = false;
     const initialSnapshot = serializeForm(form);
 
     const updateDirtyState = () => {
-      isDirty = !isSubmitting && serializeForm(form) !== initialSnapshot;
+      isDirtyRef.current =
+        !isSubmittingRef.current
+        && serializeForm(form) !== initialSnapshot;
     };
 
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (!isDirty || isSubmitting) {
+      if (!isDirtyRef.current || isSubmittingRef.current) {
         return;
       }
 
@@ -52,12 +57,16 @@ export function UnsavedFormGuard({
     };
 
     const handleSubmit = () => {
-      isSubmitting = true;
-      isDirty = false;
+      isSubmittingRef.current = true;
+      isDirtyRef.current = false;
     };
 
     const handleDocumentClick = (event: MouseEvent) => {
-      if (!isDirty || isSubmitting || event.defaultPrevented) {
+      if (
+        !isDirtyRef.current
+        || isSubmittingRef.current
+        || event.defaultPrevented
+      ) {
         return;
       }
 
@@ -95,15 +104,9 @@ export function UnsavedFormGuard({
         return;
       }
 
-      const shouldLeave = window.confirm(message);
-      if (!shouldLeave) {
-        event.preventDefault();
-        event.stopPropagation();
-        return;
-      }
-
-      isDirty = false;
-      window.location.href = destination.toString();
+      event.preventDefault();
+      event.stopPropagation();
+      setPendingHref(destination.toString());
     };
 
     form.addEventListener("input", updateDirtyState);
@@ -119,7 +122,56 @@ export function UnsavedFormGuard({
       window.removeEventListener("beforeunload", handleBeforeUnload);
       document.removeEventListener("click", handleDocumentClick, true);
     };
-  }, [formId, message]);
+  }, [formId]);
 
-  return null;
+  if (!pendingHref) {
+    return null;
+  }
+
+  return (
+    <div className="fixed inset-0 z-60 bg-black/45 p-4 sm:p-6">
+      <div className="mx-auto max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl sm:p-6">
+        <div className="flex items-start gap-3">
+          <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+            <TriangleAlert size={16} />
+          </span>
+          <div className="space-y-2">
+            <h3 className="text-base font-semibold text-slate-900">
+              Modifications non sauvegardées
+            </h3>
+            <p className="text-sm text-slate-600">
+              {message}
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            onClick={() => {
+              setPendingHref(null);
+            }}
+            className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+          >
+            Rester sur la page
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              const destination = pendingHref;
+              if (!destination) {
+                return;
+              }
+              isDirtyRef.current = false;
+              setPendingHref(null);
+              window.location.href = destination;
+            }}
+            className="inline-flex items-center justify-center rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-amber-600"
+          >
+            Quitter sans sauvegarder
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
