@@ -6,7 +6,7 @@ import { useAdminUsers } from "@/components/back-office/users/use-admin-users";
 import { UsersAdminHeader } from "@/components/back-office/users/users-admin-header";
 import { CreateUserModal } from "@/components/back-office/users/create-user-modal";
 import { UsersDeleteConfirmModal } from "@/components/back-office/users/users-delete-confirm-modal";
-import { UsersSearchInput } from "@/components/back-office/users/users-search-input";
+import { AdminSearchInput } from "@/components/back-office/admin-search-input";
 import { type AdminUser } from "@/components/back-office/users/users-shared";
 import { UsersTable } from "@/components/back-office/users/users-table";
 import { PaginationControls } from "@/components/ui/pagination-controls";
@@ -84,17 +84,24 @@ export default function UsersAdminPage() {
       <UsersAdminHeader totalUsers={totalUsers} onOpenCreateModal={openCreateModal} />
 
       <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
-        <UsersSearchInput value={query} onChange={setQuery} />
+        <div className="mb-6 flex flex-col gap-4 border-b border-gray-100 pb-4 sm:flex-row sm:items-center sm:justify-between">
+          <AdminSearchInput
+            value={query}
+            onChange={setQuery}
+            placeholder="Rechercher par nom, email ou téléphone..."
+          />
 
-        <PaginationControls
-          summary={`Page ${page} sur ${totalPages} - ${totalUsers} utilisateur${totalUsers > 1 ? "s" : ""}`}
-          currentPage={page}
-          totalPages={totalPages}
-          isPreviousDisabled={isLoading || page <= 1}
-          isNextDisabled={isLoading || page >= totalPages}
-          onPrevious={goToPreviousPage}
-          onNext={goToNextPage}
-        />
+          <PaginationControls
+            summary={`Page ${page} sur ${totalPages} - ${totalUsers} utilisateur${totalUsers > 1 ? "s" : ""}`}
+            currentPage={page}
+            totalPages={totalPages}
+            isPreviousDisabled={isLoading || page <= 1}
+            isNextDisabled={isLoading || page >= totalPages}
+            onPrevious={goToPreviousPage}
+            onNext={goToNextPage}
+            className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:justify-between"
+          />
+        </div>
 
         <UsersTable
           users={users}

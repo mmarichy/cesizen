@@ -4,6 +4,9 @@ export type ArticleCategoryDefinition = {
 	tagAliases: string[];
 };
 
+/** Limite pour les titres d’article (formulaires admin création / édition). */
+export const ARTICLE_TITLE_MAX_LENGTH = 120;
+
 export const ARTICLE_CATEGORY_DEFINITIONS: ArticleCategoryDefinition[] =
 	[
 		{

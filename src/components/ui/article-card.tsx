@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -38,7 +39,8 @@ export function ArticleCard({
 	return (
 		<Card
 			elevation={0}
-			component="article"
+			component={Link}
+			href={`/articles/${article.id}`}
 			variant="outlined"
 			sx={{
 				height: "100%",
@@ -51,6 +53,8 @@ export function ArticleCard({
 					"0 1px 3px rgba(15, 23, 42, 0.08), 0 4px 12px rgba(15, 23, 42, 0.06)",
 				transition:
 					"box-shadow 0.2s ease, border-color 0.2s ease",
+				textDecoration: "none",
+				color: "inherit",
 				"&:hover": {
 					boxShadow:
 						"0 8px 24px rgba(15, 23, 42, 0.12), 0 4px 10px rgba(15, 23, 42, 0.08)",

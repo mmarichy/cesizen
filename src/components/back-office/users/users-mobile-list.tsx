@@ -32,11 +32,11 @@ export function UsersMobileList({
   onDelete,
 }: UsersMobileListProps) {
   if (isLoading) {
-    return <p className="py-10 text-center text-sm text-gray-500">Chargement des utilisateurs...</p>;
+    return <p className="px-4 py-10 text-center text-sm text-gray-500">Chargement des utilisateurs...</p>;
   }
 
   if (users.length === 0) {
-    return <p className="py-10 text-center text-sm text-gray-500">Aucun utilisateur trouvé.</p>;
+    return <p className="px-4 py-10 text-center text-sm text-gray-500">Aucun utilisateur trouvé.</p>;
   }
 
   return (

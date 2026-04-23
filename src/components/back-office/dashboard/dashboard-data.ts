@@ -48,7 +48,7 @@ export const dashboardQuickActions = [
     title: "Créer un article",
     description: "Publier du contenu",
     icon: PlusCircle,
-    href: "/admin/articles",
+    href: "/admin/articles/new",
     containerClassName: "border-green-100 bg-green-50",
     iconClassName: "text-green-600",
   },
