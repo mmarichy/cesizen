@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { Navbar } from "@/components/layout/navbar";
-import { Footer } from "@/components/layout/footer";
 import { AuthSessionProvider } from "@/components/providers/session-provider";
 import "./globals.css";
 
@@ -18,9 +16,7 @@ export default function RootLayout({
     <html lang="fr">
       <body>
         <AuthSessionProvider>
-          <Navbar />
           {children}
-          <Footer />
         </AuthSessionProvider>
       </body>
     </html>

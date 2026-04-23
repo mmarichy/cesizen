@@ -115,14 +115,14 @@ export function ProfilPage({
                 </Link>
                 {isAdmin ? (
                   <Link
-                    href="/profil/admin"
+                    href="/admin/dashboard"
                     className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-[14px] font-semibold text-sm sm:text-base text-white no-underline shadow-md transition-transform hover:scale-[1.02] active:scale-[0.98]"
                     style={{
                       background: "linear-gradient(90deg, #3b82f6 0%, #ec4899 100%)",
                     }}
                   >
                     <Shield className="w-4 h-4" />
-                    Accès Back-Office
+                    Administration
                   </Link>
                 ) : null}
               </div>

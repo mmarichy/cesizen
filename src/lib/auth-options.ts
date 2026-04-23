@@ -23,6 +23,10 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
+        if (user.status !== "ACTIVE") {
+          return null;
+        }
+
         const valid = await bcrypt.compare(password, user.password);
         if (!valid) {
           return null;
