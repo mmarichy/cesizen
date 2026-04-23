@@ -1,5 +1,8 @@
 export const DEFAULT_PER_PAGE = 24;
 
+/** Délai minimal avant d’afficher le contenu après un changement de page (pagination). */
+export const LISTING_PAGE_CHANGE_DELAY_MS = 480;
+
 export const PER_PAGE_OPTIONS = [6, 12, 18, 24] as const;
 
 export type PerPageChoice = (typeof PER_PAGE_OPTIONS)[number];

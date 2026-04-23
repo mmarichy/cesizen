@@ -12,6 +12,7 @@ import {
 } from "react";
 import { pathnameWithQuery } from "@/constants/listing-per-page";
 import { useActivitiesFromApi } from "@/hooks/use-activities-from-api";
+import { useListingPageChangeDelay } from "@/hooks/use-listing-page-change-delay";
 import {
 	activityCategories,
 	activityDifficulties,
@@ -121,6 +122,21 @@ export function useActivitesClientViewModel(
 		setScrollReveal,
 		syncScrollRevealToUrlParams,
 	} = useUrlPaginatedSlice(filtered);
+
+	const listingFilterEpoch = useMemo(
+		() =>
+			`${query}\0${category ?? ""}\0${difficulty ?? ""}\0${durationFilter ?? ""}\0${perPage}`,
+		[
+			query,
+			category,
+			difficulty,
+			durationFilter,
+			perPage,
+		],
+	);
+
+	const { isPageChangePending } =
+		useListingPageChangeDelay(page, listingFilterEpoch);
 
 	const setCategoryInUrl = useCallback(
 		(next: ActivityCategory | null) => {
@@ -330,6 +346,7 @@ export function useActivitesClientViewModel(
 
 	return {
 		isLoading,
+		isPageChangePending,
 		query,
 		onQueryChange: setQueryInUrl,
 		clearQuery: () => {

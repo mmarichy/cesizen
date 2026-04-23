@@ -12,6 +12,7 @@ import {
 } from "react";
 import { pathnameWithQuery } from "@/constants/listing-per-page";
 import { useArticlesFromApi } from "@/hooks/use-articles-from-api";
+import { useListingPageChangeDelay } from "@/hooks/use-listing-page-change-delay";
 import { useUrlPaginatedSlice } from "@/hooks/use-url-paginated-slice";
 import {
 	ARTICLES_SEARCH_PARAM,
@@ -73,6 +74,15 @@ export function useArticlesClientViewModel(
 		setScrollReveal,
 		syncScrollRevealToUrlParams,
 	} = useUrlPaginatedSlice(filtered);
+
+	const listingFilterEpoch = useMemo(
+		() =>
+			`${query}\0${activeCategory ?? ""}\0${perPage}`,
+		[query, activeCategory, perPage],
+	);
+
+	const { isPageChangePending } =
+		useListingPageChangeDelay(page, listingFilterEpoch);
 
 	const setCategoryInUrl = useCallback(
 		(label: string | null) => {
@@ -180,6 +190,7 @@ export function useArticlesClientViewModel(
 
 	return {
 		isLoading,
+		isPageChangePending,
 		total,
 		count,
 		query,

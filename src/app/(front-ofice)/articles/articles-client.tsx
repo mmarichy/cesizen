@@ -1,10 +1,15 @@
 "use client";
 
-import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { ArticleCard } from "@/components/ui/article-card";
 import { ArticleCategoryFilters } from "@/components/ui/article-category-filters";
+import { ListingPageChangeLoader } from "@/components/ui/listing-page-change-loader";
+import { ListingPaginationStatus } from "@/components/ui/listing-pagination-status";
+import {
+	ListingCardScrollReveal,
+	ListingScrollRevealScope,
+} from "@/components/ui/listing-scroll-reveal";
 import { SearchField } from "@/components/ui/search-field";
 import { useArticlesClientViewModel } from "@/hooks/use-articles-client-view-model";
 import type { Article } from "@/lib/articles";
@@ -88,26 +93,34 @@ export function ArticlesClient({
 					nos prochains contenus.
 				</Typography>
 			) : !vm.showGrid ? null : (
+				<ListingScrollRevealScope>
 				<>
-					<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-						{vm.displayedArticles.map(
-							(article, index) => (
-								<div
-									key={article.id}
-									ref={
-										index ===
-										vm.loadMoreAnchorIndex
-											? vm.loadMoreAnchorRef
-											: undefined
-									}
-									className="min-w-0 h-full">
-									<ArticleCard
-										article={article}
-									/>
-								</div>
-							),
-						)}
-					</div>
+					{vm.isPageChangePending ? (
+						<ListingPageChangeLoader ariaLabel="Chargement de la page" />
+					) : (
+						<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+							{vm.displayedArticles.map(
+								(article, index) => (
+									<div
+										key={article.id}
+										ref={
+											index ===
+											vm.loadMoreAnchorIndex
+												? vm.loadMoreAnchorRef
+												: undefined
+										}
+										className="min-w-0 h-full">
+										<ListingCardScrollReveal
+											index={index}>
+											<ArticleCard
+												article={article}
+											/>
+										</ListingCardScrollReveal>
+									</div>
+								),
+							)}
+						</div>
+					)}
 
 					{vm.showLoadMoreHint ? (
 						<Typography
@@ -123,49 +136,17 @@ export function ArticlesClient({
 						</Typography>
 					) : null}
 
-					{vm.showPagination ? (
-						<Stack
-							alignItems="center"
-							sx={{ mt: 4 }}>
-							<Pagination
-								count={vm.totalPages}
-								page={vm.page}
-								onChange={(_, value) => {
-									vm.onPaginationChange(
-										value,
-									);
-								}}
-								color="primary"
-								shape="rounded"
-								size="large"
-								showFirstButton={
-									vm.totalPages > 5
-								}
-								showLastButton={
-									vm.totalPages > 5
-								}
-								sx={{
-									"& .MuiPaginationItem-root":
-										{
-											fontWeight: 600,
-										},
-								}}
-								aria-label={`Pagination des articles, page ${vm.page} sur ${vm.totalPages}`}
-							/>
-						</Stack>
-					) : vm.showAllLoadedHint ? (
-						<Typography
-							variant="body2"
-							textAlign="center"
-							sx={{
-								mt: 3,
-								color: "#64748b",
-							}}>
-							Tous les articles sont
-							affichés.
-						</Typography>
-					) : null}
+					<ListingPaginationStatus
+						showPagination={vm.showPagination}
+						showAllLoadedHint={vm.showAllLoadedHint}
+						page={vm.page}
+						totalPages={vm.totalPages}
+						onPaginationChange={vm.onPaginationChange}
+						paginationAriaLabel={`Pagination des articles, page ${vm.page} sur ${vm.totalPages}`}
+						allLoadedText="Tous les articles sont affichés."
+					/>
 				</>
+				</ListingScrollRevealScope>
 			)}
 		</>
 	);
