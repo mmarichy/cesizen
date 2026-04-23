@@ -259,17 +259,25 @@ async function main() {
     ],
   });
 
-  const seededContentIds = [
-    ...articleSeeds.map((article) => article.id),
-    ...activitySeeds.map((activity) => activity.id),
-  ];
+  const seededArticleIds = articleSeeds.map((article) => article.id);
+  const seededActivityIds = activitySeeds.map((activity) => activity.id);
 
   await prisma.adminAuditLog.deleteMany({
     where: {
       action: AdminAuditAction.ARTICLE_CREATED,
       actorUserId: promotedAdminUser.id,
       targetUserId: {
-        in: seededContentIds,
+        in: seededArticleIds,
+      },
+    },
+  });
+
+  await prisma.adminAuditLog.deleteMany({
+    where: {
+      action: AdminAuditAction.ACTIVITY_CREATED,
+      actorUserId: promotedAdminUser.id,
+      targetUserId: {
+        in: seededActivityIds,
       },
     },
   });
@@ -343,6 +351,25 @@ async function main() {
         author: activity.author,
       },
     });
+    await prisma.adminAuditLog.create({
+      data: {
+        action: AdminAuditAction.ACTIVITY_CREATED,
+        actorUserId: promotedAdminUser.id,
+        actorEmail: email,
+        targetUserId: activity.id,
+        targetEmail: activity.title,
+        metadata: {
+          source: "seed",
+          entityType: "activity",
+          tag: activity.tag,
+          difficulty: activity.difficulty,
+          duration: activity.duration,
+        },
+      },
+    });
+    console.log(
+      `[seed][activity] "${activity.title}" (${activity.id}) cree/mis a jour`,
+    );
   }
 
   console.log("Utilisateur admin créé ou déjà existant :", email);

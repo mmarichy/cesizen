@@ -3,28 +3,95 @@ import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { ArrowLeft } from "lucide-react";
-import { StatusType } from "@/app/generated/prisma";
-import { authOptions } from "@/lib/auth-options";
 import {
-  ARTICLE_CATEGORY_DEFINITIONS,
-  ARTICLE_TITLE_MAX_LENGTH,
-} from "@/lib/articles";
+  ActivityDuration,
+  DifficultyLevel,
+  StatusType,
+} from "@/app/generated/prisma";
+import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
+import { ActivityCreatePreviewButton } from "@/components/back-office/activities/activity-create-preview-button";
+import { ActivityDescriptionField } from "@/components/back-office/activities/activity-description-field";
+import { ActivityTitleField } from "@/components/back-office/activities/activity-title-field";
 import { ArticleContentField } from "@/components/back-office/articles/article-content-field";
 import { UnsavedFormGuard } from "@/components/back-office/unsaved-form-guard";
 
 export const dynamic = "force-dynamic";
 
-const ALLOWED_ARTICLE_TAGS = new Set(
-  ARTICLE_CATEGORY_DEFINITIONS.flatMap((d) => d.tagAliases),
-);
+const TAG_SELECT_OPTIONS: { value: string; label: string }[] = [
+  { value: "meditation", label: "Méditation" },
+  { value: "respiration", label: "Respiration" },
+  { value: "musique", label: "Musique" },
+  { value: "exercice", label: "Exercice" },
+  { value: "relaxation", label: "Relaxation" },
+];
 
-const TAG_SELECT_OPTIONS = ARTICLE_CATEGORY_DEFINITIONS.map((def) => ({
-  value: def.tagAliases[0],
-  label: def.label,
-}));
+const ALLOWED_ACTIVITY_TAGS = new Set(TAG_SELECT_OPTIONS.map((opt) => opt.value));
 
-async function createArticleAction(formData: FormData) {
+const DIFFICULTY_SELECT_OPTIONS = [
+  { value: DifficultyLevel.EASY, label: "Facile" },
+  { value: DifficultyLevel.MEDIUM, label: "Moyen" },
+  { value: DifficultyLevel.HARD, label: "Difficile" },
+] as const;
+
+const DURATION_SELECT_OPTIONS = [
+  { value: ActivityDuration.MIN_15, label: "15 minutes" },
+  { value: ActivityDuration.MIN_30, label: "30 minutes" },
+  { value: ActivityDuration.MIN_45, label: "45 minutes" },
+  { value: ActivityDuration.HOUR_1, label: "60 minutes" },
+] as const;
+const ACTIVITY_TITLE_MAX_LENGTH = 120;
+const ACTIVITY_DESCRIPTION_MAX_LENGTH = 280;
+
+function statusFromForm(raw: string): StatusType | null {
+  if (raw === "PUBLISHED") {
+    return StatusType.PUBLISHED;
+  }
+
+  if (raw === "DRAFT") {
+    return StatusType.DRAFT;
+  }
+
+  return null;
+}
+
+function difficultyFromForm(raw: string): DifficultyLevel | null {
+  if (raw === DifficultyLevel.EASY) {
+    return DifficultyLevel.EASY;
+  }
+
+  if (raw === DifficultyLevel.MEDIUM) {
+    return DifficultyLevel.MEDIUM;
+  }
+
+  if (raw === DifficultyLevel.HARD) {
+    return DifficultyLevel.HARD;
+  }
+
+  return null;
+}
+
+function durationFromForm(raw: string): ActivityDuration | null {
+  if (raw === ActivityDuration.MIN_15) {
+    return ActivityDuration.MIN_15;
+  }
+
+  if (raw === ActivityDuration.MIN_30) {
+    return ActivityDuration.MIN_30;
+  }
+
+  if (raw === ActivityDuration.MIN_45) {
+    return ActivityDuration.MIN_45;
+  }
+
+  if (raw === ActivityDuration.HOUR_1) {
+    return ActivityDuration.HOUR_1;
+  }
+
+  return null;
+}
+
+async function createActivityAction(formData: FormData) {
   "use server";
 
   const session = await getServerSession(authOptions);
@@ -37,38 +104,47 @@ async function createArticleAction(formData: FormData) {
   const content = String(formData.get("content") ?? "").trim();
   const tag = String(formData.get("tag") ?? "").trim();
   const author = String(formData.get("author") ?? "").trim();
+
+  const difficultyRaw = String(formData.get("difficulty") ?? "").trim();
+  const durationRaw = String(formData.get("duration") ?? "").trim();
   const statusRaw = String(formData.get("status") ?? "").trim();
 
+  const difficulty = difficultyFromForm(difficultyRaw);
+  const duration = durationFromForm(durationRaw);
+  const status = statusFromForm(statusRaw);
+
   if (
-    !title ||
-    title.length > ARTICLE_TITLE_MAX_LENGTH ||
-    !description ||
-    !content ||
-    !author ||
-    !ALLOWED_ARTICLE_TAGS.has(tag) ||
-    (statusRaw !== "DRAFT" && statusRaw !== "PUBLISHED")
+    !title
+    || title.length > ACTIVITY_TITLE_MAX_LENGTH
+    || !description
+    || description.length > ACTIVITY_DESCRIPTION_MAX_LENGTH
+    || !content
+    || !author
+    || !ALLOWED_ACTIVITY_TAGS.has(tag)
+    || !difficulty
+    || !duration
+    || !status
   ) {
-    redirect("/admin/articles/new?erreur=invalid");
+    redirect("/admin/activities/new?erreur=invalid");
   }
 
-  const status =
-    statusRaw === "PUBLISHED" ? StatusType.PUBLISHED : StatusType.DRAFT;
-
   await prisma.$transaction(async (tx) => {
-    const created = await tx.article.create({
+    const created = await tx.activity.create({
       data: {
         title,
         description,
         content,
         tag,
-        author,
+        difficulty,
+        duration,
         status,
+        author,
       },
     });
 
     await tx.adminAuditLog.create({
       data: {
-        action: "ARTICLE_CREATED",
+        action: "ACTIVITY_CREATED",
         actorUserId: session.user.id,
         actorEmail: session.user.email ?? "",
         targetUserId: created.id,
@@ -76,13 +152,15 @@ async function createArticleAction(formData: FormData) {
         metadata: {
           tag: created.tag,
           status: created.status,
+          difficulty: created.difficulty,
+          duration: created.duration,
         },
       },
     });
   });
 
-  revalidatePath("/admin/articles");
-  redirect("/admin/articles");
+  revalidatePath("/admin/activities");
+  redirect("/admin/activities");
 }
 
 const inputClassName =
@@ -90,7 +168,7 @@ const inputClassName =
 
 const labelClassName = "text-sm font-semibold text-gray-800";
 
-export default async function NewArticlePage({
+export default async function NewActivityPage({
   searchParams,
 }: {
   searchParams?: Promise<{ erreur?: string }>;
@@ -100,25 +178,25 @@ export default async function NewArticlePage({
 
   const session = await getServerSession(authOptions);
   const defaultAuthor =
-    session?.user?.name?.trim() ||
-    session?.user?.email?.trim() ||
-    "";
+    session?.user?.name?.trim()
+    || session?.user?.email?.trim()
+    || "";
 
   return (
     <div className="space-y-6 sm:space-y-8">
       <section>
         <Link
-          href="/admin/articles"
+          href="/admin/activities"
           className="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-orange-600 no-underline transition hover:text-orange-700"
         >
           <ArrowLeft size={16} />
           Retour à la liste
         </Link>
         <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">
-          Nouvel article
+          Nouvelle activité
         </h2>
         <p className="mt-2 text-sm text-gray-600 sm:text-base">
-          Renseignez les champs ci-dessous. Le corps de l’article accepte le{" "}
+          Renseignez les champs ci-dessous. Le contenu accepte le{" "}
           <strong className="font-semibold text-gray-800">Markdown</strong>{" "}
           (titres, listes, liens, emphase) et sera affiché formaté sur le site.
           La date de publication est celle du jour à la création.
@@ -136,42 +214,26 @@ export default async function NewArticlePage({
           </p>
         ) : null}
 
-        <UnsavedFormGuard formId="create-article-form" />
-        <form id="create-article-form" action={createArticleAction} className="space-y-5">
-          <div>
-            <label htmlFor="article-title" className={labelClassName}>
-              Titre{" "}
-              <span className="font-normal text-gray-500">
-                ({ARTICLE_TITLE_MAX_LENGTH} caractères max.)
-              </span>
-            </label>
-            <input
-              id="article-title"
-              name="title"
-              type="text"
-              required
-              maxLength={ARTICLE_TITLE_MAX_LENGTH}
-              className={inputClassName}
-              placeholder="Titre de l'article"
-            />
-          </div>
+        <UnsavedFormGuard formId="create-activity-form" />
+        <form id="create-activity-form" action={createActivityAction} className="space-y-5">
+          <ActivityTitleField
+            id="activity-title"
+            name="title"
+            maxLength={ACTIVITY_TITLE_MAX_LENGTH}
+            labelClassName={labelClassName}
+            inputClassName={inputClassName}
+          />
 
-          <div>
-            <label htmlFor="article-description" className={labelClassName}>
-              Description courte
-            </label>
-            <textarea
-              id="article-description"
-              name="description"
-              required
-              rows={3}
-              className={`${inputClassName} resize-y min-h-20`}
-              placeholder="Résumé affiché dans les listes"
-            />
-          </div>
+          <ActivityDescriptionField
+            id="activity-description"
+            name="description"
+            maxLength={ACTIVITY_DESCRIPTION_MAX_LENGTH}
+            labelClassName={labelClassName}
+            inputClassName={inputClassName}
+          />
 
           <ArticleContentField
-            id="article-content"
+            id="activity-content"
             name="content"
             required
             rows={12}
@@ -208,11 +270,11 @@ Bloc de code
 
           <div className="grid gap-5 sm:grid-cols-2">
             <div>
-              <label htmlFor="article-tag" className={labelClassName}>
+              <label htmlFor="activity-tag" className={labelClassName}>
                 Catégorie
               </label>
               <select
-                id="article-tag"
+                id="activity-tag"
                 name="tag"
                 required
                 className={inputClassName}
@@ -227,11 +289,51 @@ Bloc de code
             </div>
 
             <div>
-              <label htmlFor="article-status" className={labelClassName}>
+              <label htmlFor="activity-difficulty" className={labelClassName}>
+                Difficulté
+              </label>
+              <select
+                id="activity-difficulty"
+                name="difficulty"
+                required
+                className={inputClassName}
+                defaultValue={DifficultyLevel.EASY}
+              >
+                {DIFFICULTY_SELECT_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2">
+            <div>
+              <label htmlFor="activity-duration" className={labelClassName}>
+                Durée
+              </label>
+              <select
+                id="activity-duration"
+                name="duration"
+                required
+                className={inputClassName}
+                defaultValue={ActivityDuration.MIN_15}
+              >
+                {DURATION_SELECT_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="activity-status" className={labelClassName}>
                 Statut
               </label>
               <select
-                id="article-status"
+                id="activity-status"
                 name="status"
                 required
                 className={inputClassName}
@@ -244,11 +346,11 @@ Bloc de code
           </div>
 
           <div>
-            <label htmlFor="article-author" className={labelClassName}>
+            <label htmlFor="activity-author" className={labelClassName}>
               Auteur (nom affiché)
             </label>
             <input
-              id="article-author"
+              id="activity-author"
               name="author"
               type="text"
               required
@@ -260,16 +362,17 @@ Bloc de code
 
           <div className="flex flex-col gap-3 border-t border-gray-100 pt-6 sm:flex-row sm:justify-end">
             <Link
-              href="/admin/articles"
+              href="/admin/activities"
               className="inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-3 text-center text-sm font-semibold text-gray-700 no-underline transition hover:bg-gray-50 sm:min-w-32"
             >
               Annuler
             </Link>
+            <ActivityCreatePreviewButton formId="create-activity-form" />
             <button
               type="submit"
               className="inline-flex items-center justify-center rounded-xl bg-linear-to-r from-amber-400 to-orange-500 px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_25px_rgba(249,115,22,0.3)] transition hover:brightness-105 sm:min-w-40"
             >
-              Créer l&apos;article
+              Créer l&apos;activité
             </button>
           </div>
         </form>

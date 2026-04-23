@@ -11,6 +11,7 @@ import {
 } from "@/lib/articles";
 import { prisma } from "@/lib/prisma";
 import { ArticleContentField } from "@/components/back-office/articles/article-content-field";
+import { UnsavedFormGuard } from "@/components/back-office/unsaved-form-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -66,7 +67,7 @@ async function updateArticleAction(formData: FormData) {
 
   const existing = await prisma.article.findUnique({
     where: { id: articleId },
-    select: { id: true, title: true, status: true, tag: true },
+    select: { id: true, title: true, description: true, status: true, tag: true },
   });
 
   if (!existing) {
@@ -109,6 +110,10 @@ async function updateArticleAction(formData: FormData) {
         targetUserId: existing.id,
         targetEmail: existing.title,
         metadata: {
+          titleFrom: existing.title,
+          titleTo: title,
+          descriptionFrom: existing.description,
+          descriptionTo: description,
           tag,
           status,
           previousStatus: prevStatus,
@@ -190,7 +195,8 @@ export default async function EditArticlePage({
           </p>
         ) : null}
 
-        <form action={updateArticleAction} className="space-y-5">
+        <UnsavedFormGuard formId="edit-article-form" />
+        <form id="edit-article-form" action={updateArticleAction} className="space-y-5">
           <input type="hidden" name="articleId" value={id} />
 
           <div>
