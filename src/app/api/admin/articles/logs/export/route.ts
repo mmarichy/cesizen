@@ -1,7 +1,6 @@
-import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
 import { type AdminAuditAction } from "@/app/generated/prisma";
-import { authOptions } from "@/lib/auth-options";
+import { requireAdminSession } from "@/lib/admin/require-admin-session";
 import { prisma } from "@/lib/prisma";
 
 const ARTICLE_LOG_ACTIONS: AdminAuditAction[] = [
@@ -43,6 +42,47 @@ function roleLabel(value: unknown) {
   return null;
 }
 
+function difficultyLabel(value: unknown) {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const normalized = value.toUpperCase();
+  if (normalized === "EASY") {
+    return "Facile";
+  }
+  if (normalized === "MEDIUM") {
+    return "Moyen";
+  }
+  if (normalized === "HARD") {
+    return "Difficile";
+  }
+
+  return null;
+}
+
+function durationLabel(value: unknown) {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const normalized = value.toUpperCase();
+  if (normalized === "MIN_15") {
+    return "15 minutes";
+  }
+  if (normalized === "MIN_30") {
+    return "30 minutes";
+  }
+  if (normalized === "MIN_45") {
+    return "45 minutes";
+  }
+  if (normalized === "HOUR_1") {
+    return "60 minutes";
+  }
+
+  return null;
+}
+
 function statusLabel(value: unknown) {
   if (typeof value === "boolean") {
     return value ? "Actif" : "Inactif";
@@ -70,10 +110,29 @@ function statusLabel(value: unknown) {
   return null;
 }
 
+function fieldLabel(field: string | null) {
+  if (field === "role") return "Role";
+  if (field === "status" || field === "isactive") return "Statut";
+  if (field === "difficulty") return "Difficulte";
+  if (field === "duration") return "Duree";
+  if (field === "tag") return "Categorie";
+  return null;
+}
+
 function metadataValueLabel(value: unknown) {
   const role = roleLabel(value);
   if (role) {
     return role;
+  }
+
+  const difficulty = difficultyLabel(value);
+  if (difficulty) {
+    return difficulty;
+  }
+
+  const duration = durationLabel(value);
+  if (duration) {
+    return duration;
   }
 
   const status = statusLabel(value);
@@ -86,6 +145,16 @@ function metadataValueLabel(value: unknown) {
   }
 
   return String(value);
+}
+
+function pushUnique(items: string[], value: string | null) {
+  if (!value) {
+    return;
+  }
+
+  if (!items.includes(value)) {
+    items.push(value);
+  }
 }
 
 function formatMetadataDetails(metadata: unknown) {
@@ -102,22 +171,52 @@ function formatMetadataDetails(metadata: unknown) {
   const fromValue = metadataValueLabel(metadataObject.from);
   const toValue = metadataValueLabel(metadataObject.to);
 
-  if (field === "role" && fromValue && toValue) {
-    details.push(`Role : ${fromValue} -> ${toValue}`);
-  }
-
-  if ((field === "status" || field === "isactive") && fromValue && toValue) {
-    details.push(`Statut : ${fromValue} -> ${toValue}`);
+  const fieldText = fieldLabel(field);
+  if (fieldText && (fromValue || toValue)) {
+    pushUnique(details, `${fieldText} : ${fromValue ?? "-"} -> ${toValue ?? "-"}`);
   }
 
   const role = roleLabel(metadataObject.role);
   if (role) {
-    details.push(`Role : ${role}`);
+    pushUnique(details, `Role : ${role}`);
   }
 
   const status = statusLabel(metadataObject.isActive ?? metadataObject.status);
   if (status) {
-    details.push(`Statut : ${status}`);
+    pushUnique(details, `Statut : ${status}`);
+  }
+
+  const previousStatus = metadataValueLabel(metadataObject.previousStatus);
+  const currentStatus = metadataValueLabel(metadataObject.status);
+  if (previousStatus && currentStatus && previousStatus !== currentStatus) {
+    pushUnique(details, `Statut : ${previousStatus} -> ${currentStatus}`);
+  }
+
+  const tag = metadataValueLabel(metadataObject.tag);
+  if (tag) {
+    pushUnique(details, `Categorie : ${tag}`);
+  }
+
+  const difficulty = metadataValueLabel(metadataObject.difficulty);
+  if (difficulty) {
+    pushUnique(details, `Difficulte : ${difficulty}`);
+  }
+
+  const duration = metadataValueLabel(metadataObject.duration);
+  if (duration) {
+    pushUnique(details, `Duree : ${duration}`);
+  }
+
+  const titleFrom = metadataValueLabel(metadataObject.titleFrom);
+  const titleTo = metadataValueLabel(metadataObject.titleTo);
+  if (titleFrom && titleTo && titleFrom !== titleTo) {
+    pushUnique(details, `Titre : ${titleFrom} -> ${titleTo}`);
+  }
+
+  const descriptionFrom = metadataValueLabel(metadataObject.descriptionFrom);
+  const descriptionTo = metadataValueLabel(metadataObject.descriptionTo);
+  if (descriptionFrom && descriptionTo && descriptionFrom !== descriptionTo) {
+    pushUnique(details, "Description : mise a jour");
   }
 
   if (details.length > 0) {
@@ -145,14 +244,9 @@ function csvCell(value: string) {
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const period = requestUrl.searchParams.get("period");
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user?.id) {
-    return NextResponse.json({ message: "Non authentifie" }, { status: 401 });
-  }
-
-  if (session.user.role !== "ADMIN") {
-    return NextResponse.json({ message: "Acces interdit" }, { status: 403 });
+  const { response } = await requireAdminSession();
+  if (response) {
+    return response;
   }
 
   try {

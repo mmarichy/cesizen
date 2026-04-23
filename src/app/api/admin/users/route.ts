@@ -1,7 +1,6 @@
-import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
-import { authOptions } from "@/lib/auth-options";
+import { requireAdminSession } from "@/lib/admin/require-admin-session";
 import { formatFirstname, formatLastname } from "@/lib/format-person-name";
 import { isValidFrenchPhone, normalizeFrenchPhone } from "@/lib/normalize-phone";
 import { prisma } from "@/lib/prisma";
@@ -31,28 +30,8 @@ function toAdminUser(user: {
   };
 }
 
-async function getAdminSession() {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user?.id) {
-    return {
-      session: null,
-      response: NextResponse.json({ message: "Non authentifié" }, { status: 401 }),
-    };
-  }
-
-  if (session.user.role !== "ADMIN") {
-    return {
-      session: null,
-      response: NextResponse.json({ message: "Accès interdit" }, { status: 403 }),
-    };
-  }
-
-  return { session, response: null };
-}
-
 export async function GET(request: Request) {
-  const { response } = await getAdminSession();
+  const { response } = await requireAdminSession();
   if (response) {
     return response;
   }
@@ -122,7 +101,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const { session, response } = await getAdminSession();
+  const { session, response } = await requireAdminSession();
   if (response) {
     return response;
   }
@@ -251,7 +230,7 @@ export async function POST(request: Request) {
 }
 
 export async function PATCH(request: Request) {
-  const { session, response } = await getAdminSession();
+  const { session, response } = await requireAdminSession();
   if (response) {
     return response;
   }
@@ -398,7 +377,7 @@ export async function PATCH(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const { session, response } = await getAdminSession();
+  const { session, response } = await requireAdminSession();
   if (response) {
     return response;
   }

@@ -1,17 +1,11 @@
-import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
-import { authOptions } from "@/lib/auth-options";
+import { requireAdminSession } from "@/lib/admin/require-admin-session";
 import { getDashboardStats } from "@/lib/admin/dashboard-stats";
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user?.id) {
-    return NextResponse.json({ message: "Non authentifié" }, { status: 401 });
-  }
-
-  if (session.user.role !== "ADMIN") {
-    return NextResponse.json({ message: "Accès interdit" }, { status: 403 });
+  const { response } = await requireAdminSession();
+  if (response) {
+    return response;
   }
 
   try {
