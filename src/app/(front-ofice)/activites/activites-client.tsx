@@ -1,7 +1,6 @@
 "use client";
 
 import MenuItem from "@mui/material/MenuItem";
-import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import {
@@ -13,6 +12,12 @@ import {
 import { useSession } from "next-auth/react";
 import { ActivityCard } from "@/components/ui/activity-card";
 import { FilterSelect } from "@/components/ui/filter-select";
+import { ListingPageChangeLoader } from "@/components/ui/listing-page-change-loader";
+import { ListingPaginationStatus } from "@/components/ui/listing-pagination-status";
+import {
+	ListingCardScrollReveal,
+	ListingScrollRevealScope,
+} from "@/components/ui/listing-scroll-reveal";
 import { SearchField } from "@/components/ui/search-field";
 import {
 	PER_PAGE_OPTIONS,
@@ -328,43 +333,51 @@ export function ActivitesClient({
 					séances.
 				</Typography>
 			) : !vm.showGrid ? null : (
+				<ListingScrollRevealScope>
 				<>
-					<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-						{vm.displayedActivities.map(
-							(activity, index) => (
-								<div
-									key={activity.id}
-									ref={
-										index ===
-										vm.loadMoreAnchorIndex
-											? vm.loadMoreAnchorRef
-											: undefined
-									}
-									className="min-w-0 h-full">
-									<ActivityCard
-										activity={activity}
-										isFavorite={favoriteIds.has(
-											String(
-												activity.id,
-											),
-										)}
-										onFavoriteChange={
-											status ===
-											"authenticated"
-												? (next) =>
-														toggleFavorite(
-															String(
-																activity.id,
-															),
-															next,
-														)
+					{vm.isPageChangePending ? (
+						<ListingPageChangeLoader ariaLabel="Chargement de la page" />
+					) : (
+						<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+							{vm.displayedActivities.map(
+								(activity, index) => (
+									<div
+										key={activity.id}
+										ref={
+											index ===
+											vm.loadMoreAnchorIndex
+												? vm.loadMoreAnchorRef
 												: undefined
 										}
-									/>
-								</div>
-							),
-						)}
-					</div>
+										className="min-w-0 h-full">
+										<ListingCardScrollReveal
+											index={index}>
+											<ActivityCard
+												activity={activity}
+												isFavorite={favoriteIds.has(
+													String(
+														activity.id,
+													),
+												)}
+												onFavoriteChange={
+													status ===
+													"authenticated"
+														? (next) =>
+																toggleFavorite(
+																	String(
+																		activity.id,
+																	),
+																	next,
+																)
+														: undefined
+												}
+											/>
+										</ListingCardScrollReveal>
+									</div>
+								),
+							)}
+						</div>
+					)}
 
 					{vm.showLoadMoreHint ? (
 						<Typography
@@ -379,49 +392,17 @@ export function ActivitesClient({
 						</Typography>
 					) : null}
 
-					{vm.showPagination ? (
-						<Stack
-							alignItems="center"
-							sx={{ mt: 4 }}>
-							<Pagination
-								count={vm.totalPages}
-								page={vm.page}
-								onChange={(_, value) => {
-									vm.onPaginationChange(
-										value,
-									);
-								}}
-								color="primary"
-								shape="rounded"
-								size="large"
-								showFirstButton={
-									vm.totalPages > 5
-								}
-								showLastButton={
-									vm.totalPages > 5
-								}
-								sx={{
-									"& .MuiPaginationItem-root":
-										{
-											fontWeight: 600,
-										},
-								}}
-								aria-label={`Pagination des activités, page ${vm.page} sur ${vm.totalPages}`}
-							/>
-						</Stack>
-					) : vm.showAllLoadedHint ? (
-						<Typography
-							variant="body2"
-							textAlign="center"
-							sx={{
-								mt: 3,
-								color: "#64748b",
-							}}>
-							Toutes les activités sont
-							affichées.
-						</Typography>
-					) : null}
+					<ListingPaginationStatus
+						showPagination={vm.showPagination}
+						showAllLoadedHint={vm.showAllLoadedHint}
+						page={vm.page}
+						totalPages={vm.totalPages}
+						onPaginationChange={vm.onPaginationChange}
+						paginationAriaLabel={`Pagination des activités, page ${vm.page} sur ${vm.totalPages}`}
+						allLoadedText="Toutes les activités sont affichées."
+					/>
 				</>
+				</ListingScrollRevealScope>
 			)}
 		</>
 	);
