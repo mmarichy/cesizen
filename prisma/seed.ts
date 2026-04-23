@@ -259,6 +259,21 @@ async function main() {
     ],
   });
 
+  const seededContentIds = [
+    ...articleSeeds.map((article) => article.id),
+    ...activitySeeds.map((activity) => activity.id),
+  ];
+
+  await prisma.adminAuditLog.deleteMany({
+    where: {
+      action: AdminAuditAction.ARTICLE_CREATED,
+      actorUserId: promotedAdminUser.id,
+      targetUserId: {
+        in: seededContentIds,
+      },
+    },
+  });
+
   for (const article of articleSeeds) {
     await prisma.article.upsert({
       where: { id: article.id },
@@ -282,6 +297,23 @@ async function main() {
         author: article.author,
       },
     });
+    await prisma.adminAuditLog.create({
+      data: {
+        action: AdminAuditAction.ARTICLE_CREATED,
+        actorUserId: promotedAdminUser.id,
+        actorEmail: email,
+        targetUserId: article.id,
+        targetEmail: article.title,
+        metadata: {
+          source: "seed",
+          entityType: "article",
+          tag: article.tag,
+        },
+      },
+    });
+    console.log(
+      `[seed][article] "${article.title}" (${article.id}) cree/mis a jour`,
+    );
   }
 
   for (const activity of activitySeeds) {
