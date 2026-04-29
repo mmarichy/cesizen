@@ -3,11 +3,12 @@
 import { useMemo, useState } from "react";
 import { Eye, X } from "lucide-react";
 
-type ActivityCreatePreviewButtonProps = {
+type ActivityFormPreviewButtonProps = {
   formId: string;
+  previewPath: "/preview/activities/new" | "/preview/activities/edit";
 };
 
-function buildPreviewUrl(form: HTMLFormElement) {
+function buildPreviewUrl(form: HTMLFormElement, previewPath: string) {
   const formData = new FormData(form);
   const params = new URLSearchParams();
 
@@ -17,16 +18,17 @@ function buildPreviewUrl(form: HTMLFormElement) {
     }
   }
 
-  return `/preview/activities/new?${params.toString()}`;
+  return `${previewPath}?${params.toString()}`;
 }
 
-export function ActivityCreatePreviewButton({
+export function ActivityFormPreviewButton({
   formId,
-}: ActivityCreatePreviewButtonProps) {
+  previewPath,
+}: ActivityFormPreviewButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  const iframeSrc = useMemo(() => previewUrl ?? "/preview/activities/new", [previewUrl]);
+  const iframeSrc = useMemo(() => previewUrl ?? previewPath, [previewUrl, previewPath]);
 
   const openPreview = () => {
     const form = document.getElementById(formId);
@@ -34,7 +36,7 @@ export function ActivityCreatePreviewButton({
       return;
     }
 
-    setPreviewUrl(buildPreviewUrl(form));
+    setPreviewUrl(buildPreviewUrl(form, previewPath));
     setIsOpen(true);
   };
 
@@ -58,9 +60,7 @@ export function ActivityCreatePreviewButton({
               </h3>
               <button
                 type="button"
-                onClick={() => {
-                  setIsOpen(false);
-                }}
+                onClick={() => setIsOpen(false)}
                 className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition hover:bg-slate-100"
                 aria-label="Fermer l'aperçu"
               >

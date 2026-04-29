@@ -57,7 +57,7 @@ export const dashboardQuickActions = [
     title: "Ajouter une activité",
     description: "Nouvelle activité de détente",
     icon: Sparkles,
-    href: "/admin/activities",
+    href: "/admin/activities/new",
     containerClassName: "border-purple-100 bg-purple-50",
     iconClassName: "text-purple-600",
   },

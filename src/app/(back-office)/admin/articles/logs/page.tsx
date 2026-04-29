@@ -364,57 +364,57 @@ export default async function AdminArticleLogsPage({
               {logs.map((log) => {
                 const detailsLines = formatMetadataDetails(log.metadata);
                 return (
-                <article key={log.id} className="min-w-0 overflow-hidden rounded-2xl border border-gray-200 p-4 shadow-xs">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="min-w-0 flex-1">
+                  <article key={log.id} className="min-w-0 overflow-hidden rounded-2xl border border-gray-200 p-4 shadow-xs">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <span
+                          title={actionLabel(log.action)}
+                          className={[
+                            "inline-block max-w-full truncate rounded-full px-3 py-1 text-xs font-semibold align-middle",
+                            actionBadgeClassName(log.action),
+                          ].join(" ")}
+                        >
+                          {actionLabel(log.action)}
+                        </span>
+                      </div>
                       <span
-                        title={actionLabel(log.action)}
-                        className={[
-                          "inline-block max-w-full truncate rounded-full px-3 py-1 text-xs font-semibold align-middle",
-                          actionBadgeClassName(log.action),
-                        ].join(" ")}
+                        className="shrink-0 truncate text-xs text-gray-500"
+                        title={formatDateTime(log.createdAt)}
                       >
-                        {actionLabel(log.action)}
+                        {formatDateTime(log.createdAt)}
                       </span>
                     </div>
-                    <span
-                      className="shrink-0 truncate text-xs text-gray-500"
-                      title={formatDateTime(log.createdAt)}
-                    >
-                      {formatDateTime(log.createdAt)}
-                    </span>
-                  </div>
 
-                  <div className="mt-3 space-y-2 text-sm">
-                    <p className="flex min-w-0 gap-1 text-gray-700">
-                      <span className="shrink-0 font-semibold text-gray-900">Acteur: </span>
-                      <span
-                        className="min-w-0 truncate"
-                        title={log.actorEmail || log.actorUserId || "-"}
-                      >
-                        {log.actorEmail || log.actorUserId || "-"}
-                      </span>
-                    </p>
-                    <p className="flex min-w-0 gap-1 text-gray-700">
-                      <span className="shrink-0 font-semibold text-gray-900">Cible: </span>
-                      <span
-                        className="min-w-0 truncate"
-                        title={log.targetEmail || log.targetUserId || "-"}
-                      >
-                        {log.targetEmail || log.targetUserId || "-"}
-                      </span>
-                    </p>
-                    <p className="flex min-w-0 gap-1 text-gray-700">
-                      <span className="shrink-0 font-semibold text-gray-900">Détails: </span>
-                      <span
-                        className="min-w-0 whitespace-normal wrap-break-word text-gray-600"
-                        title={detailsLines.join(" · ")}
-                      >
-                        {detailsLines.join(" · ")}
-                      </span>
-                    </p>
-                  </div>
-                </article>
+                    <div className="mt-3 space-y-2 text-sm">
+                      <p className="flex min-w-0 gap-1 text-gray-700">
+                        <span className="shrink-0 font-semibold text-gray-900">Acteur: </span>
+                        <span
+                          className="min-w-0 truncate"
+                          title={log.actorEmail || log.actorUserId || "-"}
+                        >
+                          {log.actorEmail || log.actorUserId || "-"}
+                        </span>
+                      </p>
+                      <p className="flex min-w-0 gap-1 text-gray-700">
+                        <span className="shrink-0 font-semibold text-gray-900">Cible: </span>
+                        <span
+                          className="min-w-0 truncate"
+                          title={(log.metadata as { contentTitle?: string } | null)?.contentTitle || log.targetEmail || log.targetUserId || "-"}
+                        >
+                          {(log.metadata as { contentTitle?: string } | null)?.contentTitle || log.targetEmail || log.targetUserId || "-"}
+                        </span>
+                      </p>
+                      <p className="flex min-w-0 gap-1 text-gray-700">
+                        <span className="shrink-0 font-semibold text-gray-900">Détails: </span>
+                        <span
+                          className="min-w-0 whitespace-normal wrap-break-word text-gray-600"
+                          title={detailsLines.join(" · ")}
+                        >
+                          {detailsLines.join(" · ")}
+                        </span>
+                      </p>
+                    </div>
+                  </article>
                 );
               })}
             </div>
@@ -432,65 +432,65 @@ export default async function AdminArticleLogsPage({
                 </thead>
                 <tbody>
                   {logs.map((log) => {
-                    const targetLabel = log.targetEmail || log.targetUserId || "-";
+                    const targetLabel = (log.metadata as { contentTitle?: string } | null)?.contentTitle || log.targetEmail || log.targetUserId || "-";
                     return (
-                    <tr key={log.id} className="border-t border-gray-100">
-                      <td className="min-w-0 max-w-0 overflow-hidden px-4 py-5 text-sm align-middle">
-                        <span
-                          title={actionLabel(log.action)}
-                          className={[
-                            "block max-w-full truncate rounded-full px-3 py-1 text-xs font-semibold",
-                            actionBadgeClassName(log.action),
-                          ].join(" ")}
-                        >
-                          {actionLabel(log.action)}
-                        </span>
-                      </td>
-                      <td className="min-w-0 max-w-0 overflow-hidden px-4 py-5 text-sm text-gray-700 align-middle">
-                        <p
-                          className="truncate"
-                          title={log.actorEmail || log.actorUserId || "-"}
-                        >
-                          {log.actorEmail || log.actorUserId || "-"}
-                        </p>
-                      </td>
-                      <td className="min-w-0 max-w-0 overflow-hidden px-4 py-5 text-sm text-gray-700 align-middle">
-                        <p
-                          className="truncate"
-                          title={targetLabel}
-                        >
-                          {targetLabel}
-                        </p>
-                      </td>
-                      <td className="min-w-0 max-w-0 overflow-hidden px-4 py-5 text-sm text-gray-600 align-middle">
-                        <div className="min-w-0 space-y-1">
-                          {formatMetadataDetails(log.metadata).map((detail, index) => (
-                            <p
-                              key={`${log.id}-detail-${index}`}
-                              className="whitespace-normal wrap-break-word"
-                              title={detail}
-                            >
-                              {detail}
-                            </p>
-                          ))}
-                        </div>
-                      </td>
-                      <td className="min-w-0 max-w-0 overflow-hidden px-4 py-5 text-sm text-gray-600 align-middle">
-                        <p
-                          className="truncate"
-                          title={formatDateTime(log.createdAt)}
-                        >
-                          {formatDateTime(log.createdAt)}
-                        </p>
-                      </td>
-                    </tr>
+                      <tr key={log.id} className="border-t border-gray-100">
+                        <td className="min-w-0 max-w-0 overflow-hidden px-4 py-5 text-sm align-middle">
+                          <span
+                            title={actionLabel(log.action)}
+                            className={[
+                              "block max-w-full truncate rounded-full px-3 py-1 text-xs font-semibold",
+                              actionBadgeClassName(log.action),
+                            ].join(" ")}
+                          >
+                            {actionLabel(log.action)}
+                          </span>
+                        </td>
+                        <td className="min-w-0 max-w-0 overflow-hidden px-4 py-5 text-sm text-gray-700 align-middle">
+                          <p
+                            className="truncate"
+                            title={log.actorEmail || log.actorUserId || "-"}
+                          >
+                            {log.actorEmail || log.actorUserId || "-"}
+                          </p>
+                        </td>
+                        <td className="min-w-0 max-w-0 overflow-hidden px-4 py-5 text-sm text-gray-700 align-middle">
+                          <p
+                            className="truncate"
+                            title={targetLabel}
+                          >
+                            {targetLabel}
+                          </p>
+                        </td>
+                        <td className="min-w-0 max-w-0 overflow-hidden px-4 py-5 text-sm text-gray-600 align-middle">
+                          <div className="min-w-0 space-y-1">
+                            {formatMetadataDetails(log.metadata).map((detail, index) => (
+                              <p
+                                key={`${log.id}-detail-${index}`}
+                                className="whitespace-normal wrap-break-word"
+                                title={detail}
+                              >
+                                {detail}
+                              </p>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="min-w-0 max-w-0 overflow-hidden px-4 py-5 text-sm text-gray-600 align-middle">
+                          <p
+                            className="truncate"
+                            title={formatDateTime(log.createdAt)}
+                          >
+                            {formatDateTime(log.createdAt)}
+                          </p>
+                        </td>
+                      </tr>
                     );
                   })}
                 </tbody>
               </table>
             </div>
           </>
-          
+
         )}
 
       </section>

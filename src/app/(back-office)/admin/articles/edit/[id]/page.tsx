@@ -8,6 +8,7 @@ import { authOptions } from "@/lib/auth-options";
 import {
   ARTICLE_CATEGORY_DEFINITIONS,
   ARTICLE_TITLE_MAX_LENGTH,
+  articleTagToCategory,
 } from "@/lib/articles";
 import { prisma } from "@/lib/prisma";
 import { ArticleContentField } from "@/components/back-office/articles/article-content-field";
@@ -107,9 +108,11 @@ async function updateArticleAction(formData: FormData) {
         action: "ARTICLE_UPDATED",
         actorUserId: session.user.id,
         actorEmail: session.user.email ?? "",
-        targetUserId: existing.id,
-        targetEmail: existing.title,
+        targetUserId: "",
+        targetEmail: null,
         metadata: {
+          contentId: existing.id,
+          contentTitle: existing.title,
           titleFrom: existing.title,
           titleTo: title,
           descriptionFrom: existing.description,
@@ -150,11 +153,12 @@ export default async function EditArticlePage({
     notFound();
   }
 
-  const tagOptions = [...TAG_SELECT_OPTIONS];
+  const tagOptions: { value: string; label: string }[] = [...TAG_SELECT_OPTIONS];
   if (!ALLOWED_ARTICLE_TAGS.has(article.tag)) {
+    const { label } = articleTagToCategory(article.tag);
     tagOptions.push({
       value: article.tag,
-      label: `${article.tag} (hérité)`,
+      label: `${label} (hérité)`,
     });
   }
 

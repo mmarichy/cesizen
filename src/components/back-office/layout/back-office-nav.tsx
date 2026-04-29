@@ -11,8 +11,8 @@ type BackOfficeNavProps = {
 const items = [
   {
     key: "dashboard",
-    label: "dashboard",
-    mobileLabel: "dashboard",
+    label: "Dashboard",
+    mobileLabel: "Dashboard",
     icon: LayoutDashboard,
     getHref: (adminRoot: string) => `${adminRoot}/dashboard`,
   },

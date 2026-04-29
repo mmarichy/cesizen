@@ -14,12 +14,12 @@ export async function GET(request: Request) {
     const limitParam = Number(searchParams.get("limit") ?? "10");
     const queryParam = searchParams.get("q")?.trim() ?? "";
 
-    const page = Number.isFinite(pageParam) && pageParam > 0
-      ? Math.floor(pageParam)
-      : 1;
-    const limit = Number.isFinite(limitParam) && limitParam > 0
-      ? Math.min(Math.floor(limitParam), 100)
-      : 10;
+    const page =
+      Number.isFinite(pageParam) && pageParam > 0 ? Math.floor(pageParam) : 1;
+    const limit =
+      Number.isFinite(limitParam) && limitParam > 0
+        ? Math.min(Math.floor(limitParam), 100)
+        : 10;
 
     const where = queryParam
       ? {
@@ -112,9 +112,11 @@ export async function PATCH(request: Request) {
             action: "ARTICLE_STATUS_CHANGED",
             actorUserId: session.user.id,
             actorEmail: session.user.email ?? "",
-            targetUserId: existing.id,
-            targetEmail: existing.title,
+            targetUserId: "",
+            targetEmail: null,
             metadata: {
+              contentId: existing.id,
+              contentTitle: existing.title,
               field: "status",
               from: existing.status,
               to: "ARCHIVED",
@@ -139,9 +141,11 @@ export async function PATCH(request: Request) {
             action: "ARTICLE_STATUS_CHANGED",
             actorUserId: session.user.id,
             actorEmail: session.user.email ?? "",
-            targetUserId: existing.id,
-            targetEmail: existing.title,
+            targetUserId: "",
+            targetEmail: null,
             metadata: {
+              contentId: existing.id,
+              contentTitle: existing.title,
               field: "status",
               from: existing.status,
               to: "PUBLISHED",
@@ -208,8 +212,12 @@ export async function DELETE(request: Request) {
           action: "ARTICLE_DELETED",
           actorUserId: session.user.id,
           actorEmail: session.user.email ?? "",
-          targetUserId: existing.id,
-          targetEmail: existing.title,
+          targetUserId: "",
+          targetEmail: null,
+          metadata: {
+            contentId: existing.id,
+            contentTitle: existing.title,
+          },
         },
       });
     });

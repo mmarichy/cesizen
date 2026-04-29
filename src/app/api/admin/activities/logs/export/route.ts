@@ -165,15 +165,19 @@ function formatMetadataDetails(metadata: unknown) {
   const metadataObject = metadata as Record<string, unknown>;
   const details: string[] = [];
 
-  const field = typeof metadataObject.field === "string"
-    ? metadataObject.field.toLowerCase()
-    : null;
+  const field =
+    typeof metadataObject.field === "string"
+      ? metadataObject.field.toLowerCase()
+      : null;
   const fromValue = metadataValueLabel(metadataObject.from);
   const toValue = metadataValueLabel(metadataObject.to);
 
   const fieldText = fieldLabel(field);
   if (fieldText && (fromValue || toValue)) {
-    pushUnique(details, `${fieldText} : ${fromValue ?? "-"} -> ${toValue ?? "-"}`);
+    pushUnique(
+      details,
+      `${fieldText} : ${fromValue ?? "-"} -> ${toValue ?? "-"}`,
+    );
   }
 
   const role = roleLabel(metadataObject.role);
@@ -181,15 +185,15 @@ function formatMetadataDetails(metadata: unknown) {
     pushUnique(details, `Role : ${role}`);
   }
 
-  const status = statusLabel(metadataObject.isActive ?? metadataObject.status);
-  if (status) {
-    pushUnique(details, `Statut : ${status}`);
-  }
-
   const previousStatus = metadataValueLabel(metadataObject.previousStatus);
   const currentStatus = metadataValueLabel(metadataObject.status);
   if (previousStatus && currentStatus && previousStatus !== currentStatus) {
     pushUnique(details, `Statut : ${previousStatus} -> ${currentStatus}`);
+  } else {
+    const status = statusLabel(metadataObject.isActive ?? metadataObject.status);
+    if (status) {
+      pushUnique(details, `Statut : ${status}`);
+    }
   }
 
   const tag = metadataValueLabel(metadataObject.tag);
@@ -237,7 +241,7 @@ function formatDateTime(value: Date) {
 }
 
 function csvCell(value: string) {
-  const escaped = value.replaceAll("\"", "\"\"");
+  const escaped = value.replaceAll('"', '""');
   return `"${escaped}"`;
 }
 
@@ -256,11 +260,12 @@ export async function GET(request: Request) {
     const thirtyDaysAgo = new Date(now);
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const dateFilter = period === "7d"
-      ? { createdAt: { gte: sevenDaysAgo } }
-      : period === "all"
-        ? undefined
-        : { createdAt: { gte: thirtyDaysAgo } };
+    const dateFilter =
+      period === "7d"
+        ? { createdAt: { gte: sevenDaysAgo } }
+        : period === "all"
+          ? undefined
+          : { createdAt: { gte: thirtyDaysAgo } };
 
     const where = {
       ...dateFilter,
@@ -288,7 +293,8 @@ export async function GET(request: Request) {
       .map((row) => row.map((cell) => csvCell(cell)).join(";"))
       .join("\n");
 
-    const periodSuffix = period === "7d" ? "7j" : period === "all" ? "all" : "30j";
+    const periodSuffix =
+      period === "7d" ? "7j" : period === "all" ? "all" : "30j";
     const filename = `logs-activites-${periodSuffix}-${new Date().toISOString().slice(0, 10)}.csv`;
 
     return new NextResponse(`\uFEFF${csvContent}`, {

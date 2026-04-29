@@ -114,7 +114,7 @@ type ActivityCategoryDefinition = {
 	tagAliases: string[];
 };
 
-const ACTIVITY_CATEGORY_DEFINITIONS: ActivityCategoryDefinition[] =
+export const ACTIVITY_CATEGORY_DEFINITIONS: ActivityCategoryDefinition[] =
 	[
 		{
 			label: "Méditation",

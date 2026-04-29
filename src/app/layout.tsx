@@ -4,7 +4,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Cesizen",
-  description: "Cesizen se ressourcer et s'apaiser ensemble",
+  description: "Cesizen — la plateforme pour se ressourcer et s'apaiser ensemble.",
 };
 
 export default function RootLayout({

@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { Brain, ArrowRight, Zap } from "lucide-react";
-import { homeStats } from "@/constants";
 import { Button } from "@/components/ui/button";
+import { getHomeStats } from "@/lib/home-stats";
+
+export const revalidate = 300;
 
 const HERO_BUTTON_BASE_SX = {
   px: 4,
@@ -39,7 +41,9 @@ const heroCards = [
   },
 ];
 
-export default function Page() {
+export default async function Page() {
+  const homeStats = await getHomeStats();
+
   return (
     <div className="min-h-screen bg-linear-to-br from-white via-emerald-50/30 to-yellow-50/30 md:from-white md:via-emerald-300/30 md:to-yellow-400/30 pb-24 md:pb-6">
       {/* Hero Section - Full Height */}

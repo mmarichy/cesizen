@@ -6,8 +6,6 @@ import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import { ParametreProfilForm } from "./parametre-profil-form";
 
-const CESI_GREEN = "#00D177";
-
 export default async function ParametreProfilPage() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
@@ -45,7 +43,7 @@ export default async function ParametreProfilPage() {
             <div
               className="w-16 h-16 rounded-2xl shadow-xl flex items-center justify-center text-white"
               style={{
-                background: `linear-gradient(135deg, ${CESI_GREEN} 0%, #00BC7D 100%)`,
+                background: `linear-gradient(135deg, #00D177 0%, #00BC7D 100%)`,
               }}
             >
               <Settings className="w-8 h-8" />

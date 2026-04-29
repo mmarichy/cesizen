@@ -71,9 +71,11 @@ async function createArticleAction(formData: FormData) {
         action: "ARTICLE_CREATED",
         actorUserId: session.user.id,
         actorEmail: session.user.email ?? "",
-        targetUserId: created.id,
-        targetEmail: created.title,
+        targetUserId: "",
+        targetEmail: null,
         metadata: {
+          contentId: created.id,
+          contentTitle: created.title,
           tag: created.tag,
           status: created.status,
         },

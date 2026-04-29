@@ -94,58 +94,58 @@ export function ArticlesClient({
 				</Typography>
 			) : !vm.showGrid ? null : (
 				<ListingScrollRevealScope>
-				<>
-					{vm.isPageChangePending ? (
-						<ListingPageChangeLoader ariaLabel="Chargement de la page" />
-					) : (
-						<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-							{vm.displayedArticles.map(
-								(article, index) => (
-									<div
-										key={article.id}
-										ref={
-											index ===
-											vm.loadMoreAnchorIndex
-												? vm.loadMoreAnchorRef
-												: undefined
-										}
-										className="min-w-0 h-full">
-										<ListingCardScrollReveal
-											index={index}>
-											<ArticleCard
-												article={article}
-											/>
-										</ListingCardScrollReveal>
-									</div>
-								),
-							)}
-						</div>
-					)}
+					<>
+						{vm.isPageChangePending ? (
+							<ListingPageChangeLoader ariaLabel="Chargement de la page" />
+						) : (
+							<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+								{vm.displayedArticles.map(
+									(article, index) => (
+										<div
+											key={article.id}
+											ref={
+												index ===
+													vm.loadMoreAnchorIndex
+													? vm.loadMoreAnchorRef
+													: undefined
+											}
+											className="min-w-0 h-full">
+											<ListingCardScrollReveal
+												index={index}>
+												<ArticleCard
+													article={article}
+												/>
+											</ListingCardScrollReveal>
+										</div>
+									),
+								)}
+							</div>
+						)}
 
-					{vm.showLoadMoreHint ? (
-						<Typography
-							variant="body2"
-							textAlign="center"
-							sx={{
-								mt: 3,
-								color: "#64748b",
-							}}>
-							Affichez le dernier article de
-							la ligne pour en charger
-							d’autres…
-						</Typography>
-					) : null}
+						{vm.showLoadMoreHint ? (
+							<Typography
+								variant="body2"
+								textAlign="center"
+								sx={{
+									mt: 3,
+									color: "#64748b",
+								}}>
+								Affichez le dernier article de
+								la ligne pour en charger
+								d’autres…
+							</Typography>
+						) : null}
 
-					<ListingPaginationStatus
-						showPagination={vm.showPagination}
-						showAllLoadedHint={vm.showAllLoadedHint}
-						page={vm.page}
-						totalPages={vm.totalPages}
-						onPaginationChange={vm.onPaginationChange}
-						paginationAriaLabel={`Pagination des articles, page ${vm.page} sur ${vm.totalPages}`}
-						allLoadedText="Tous les articles sont affichés."
-					/>
-				</>
+						<ListingPaginationStatus
+							showPagination={vm.showPagination}
+							showAllLoadedHint={vm.showAllLoadedHint}
+							page={vm.page}
+							totalPages={vm.totalPages}
+							onPaginationChange={vm.onPaginationChange}
+							paginationAriaLabel={`Pagination des articles, page ${vm.page} sur ${vm.totalPages}`}
+							allLoadedText="Tous les articles sont affichés."
+						/>
+					</>
 				</ListingScrollRevealScope>
 			)}
 		</>

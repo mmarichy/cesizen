@@ -245,7 +245,7 @@ export default function ArticlesAdminPage() {
                         >
                           <Power size={14} className="shrink-0" />
                           <span className="min-w-0 truncate">
-                            {isArchived ? "Activer" : "Désactiver"}
+                            {isArchived ? "Publier" : "Archiver"}
                           </span>
                         </button>
                       </form>
@@ -335,7 +335,7 @@ export default function ArticlesAdminPage() {
                               >
                                 <Power size={14} className="shrink-0" />
                                 <span className="min-w-0 text-center">
-                                  {isArchived ? "Activer" : "Désactiver"}
+                                  {isArchived ? "Publier" : "Archiver"}
                                 </span>
                               </button>
                             </form>

@@ -11,9 +11,9 @@ const navLinks = [
 ];
 
 const legalLinks = [
-  { href: "/mentions-legales", label: "Mentions légales", dotColor: "#00BC7D", hoverColor: "#00C950" },
-  { href: "/confidentialite", label: "Politique de confidentialité", dotColor: "#FDC700", hoverColor: "#FDC700" },
-  { href: "/cgu", label: "CGU", dotColor: "#00BC7D", hoverColor: "#00C950" },
+  { href: "/#", label: "Mentions légales", dotColor: "#00BC7D", hoverColor: "#00C950" },
+  { href: "/#", label: "Politique de confidentialité", dotColor: "#FDC700", hoverColor: "#FDC700" },
+  { href: "/#", label: "CGU", dotColor: "#00BC7D", hoverColor: "#00C950" },
 ];
 
 export function Footer() {

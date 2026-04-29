@@ -11,6 +11,7 @@ import { type AdminUser } from "@/components/back-office/users/users-shared";
 import { UsersTable } from "@/components/back-office/users/users-table";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 import { useUrlModal } from "@/hooks/use-url-modal";
+import { toast } from "sonner";
 
 export default function UsersAdminPage() {
   const [query, setQuery] = useState("");
@@ -75,6 +76,7 @@ export default function UsersAdminPage() {
         setUserToDelete(null);
       })
       .catch(() => {
+        toast.error("Erreur lors de la suppression de l'utilisateur");
       });
   };
 
