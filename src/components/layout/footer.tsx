@@ -49,7 +49,7 @@ export function Footer() {
               <h3 className="text-white font-semibold text-base">Navigation</h3>
               <ul className="flex flex-col gap-2 list-none m-0 p-0">
                 {navLinks.map(({ href, label, dotColor, hoverColor }) => (
-                  <li key={href} className="flex items-center gap-2">
+                  <li key={label} className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: dotColor }} />
                     <Link
                       href={href}
@@ -68,7 +68,7 @@ export function Footer() {
               <h3 className="text-white font-semibold text-base">Informations légales</h3>
               <ul className="flex flex-col gap-2 list-none m-0 p-0">
                 {legalLinks.map(({ href, label, dotColor, hoverColor }) => (
-                  <li key={href} className="flex items-center gap-2">
+                  <li key={label} className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: dotColor }} />
                     <Link
                       href={href}
