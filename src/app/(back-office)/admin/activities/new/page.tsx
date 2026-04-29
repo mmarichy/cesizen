@@ -9,8 +9,9 @@ import {
   StatusType,
 } from "@/app/generated/prisma";
 import { authOptions } from "@/lib/auth-options";
+import { ACTIVITY_CATEGORY_DEFINITIONS } from "@/lib/activities";
 import { prisma } from "@/lib/prisma";
-import { ActivityCreatePreviewButton } from "@/components/back-office/activities/activity-create-preview-button";
+import { ActivityFormPreviewButton } from "@/components/back-office/activities/activity-form-preview-button";
 import { ActivityDescriptionField } from "@/components/back-office/activities/activity-description-field";
 import { ActivityTitleField } from "@/components/back-office/activities/activity-title-field";
 import { ArticleContentField } from "@/components/back-office/articles/article-content-field";
@@ -18,15 +19,14 @@ import { UnsavedFormGuard } from "@/components/back-office/unsaved-form-guard";
 
 export const dynamic = "force-dynamic";
 
-const TAG_SELECT_OPTIONS: { value: string; label: string }[] = [
-  { value: "meditation", label: "Méditation" },
-  { value: "respiration", label: "Respiration" },
-  { value: "musique", label: "Musique" },
-  { value: "exercice", label: "Exercice" },
-  { value: "relaxation", label: "Relaxation" },
-];
+const TAG_SELECT_OPTIONS = ACTIVITY_CATEGORY_DEFINITIONS.map((def) => ({
+  value: def.tagAliases[0],
+  label: def.label,
+}));
 
-const ALLOWED_ACTIVITY_TAGS = new Set(TAG_SELECT_OPTIONS.map((opt) => opt.value));
+const ALLOWED_ACTIVITY_TAGS = new Set(
+  ACTIVITY_CATEGORY_DEFINITIONS.flatMap((d) => d.tagAliases),
+);
 
 const DIFFICULTY_SELECT_OPTIONS = [
   { value: DifficultyLevel.EASY, label: "Facile" },
@@ -147,9 +147,11 @@ async function createActivityAction(formData: FormData) {
         action: "ACTIVITY_CREATED",
         actorUserId: session.user.id,
         actorEmail: session.user.email ?? "",
-        targetUserId: created.id,
-        targetEmail: created.title,
+        targetUserId: "",
+        targetEmail: null,
         metadata: {
+          contentId: created.id,
+          contentTitle: created.title,
           tag: created.tag,
           status: created.status,
           difficulty: created.difficulty,
@@ -367,7 +369,7 @@ Bloc de code
             >
               Annuler
             </Link>
-            <ActivityCreatePreviewButton formId="create-activity-form" />
+            <ActivityFormPreviewButton formId="create-activity-form" previewPath="/preview/activities/new" />
             <button
               type="submit"
               className="inline-flex items-center justify-center rounded-xl bg-linear-to-r from-amber-400 to-orange-500 px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_25px_rgba(249,115,22,0.3)] transition hover:brightness-105 sm:min-w-40"

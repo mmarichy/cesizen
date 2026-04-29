@@ -2,7 +2,7 @@ import { ActivityPreviewContent } from "@/components/preview/activity-preview-co
 
 export const dynamic = "force-dynamic";
 
-export default async function NewActivityPreviewPage({
+export default async function EditActivityPreviewPage({
   searchParams,
 }: {
   searchParams?: Promise<{

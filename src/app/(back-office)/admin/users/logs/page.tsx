@@ -323,7 +323,7 @@ export default async function AdminUsersLogsPage({
               </table>
             </div>
           </>
-          
+
         )}
 
       </section>

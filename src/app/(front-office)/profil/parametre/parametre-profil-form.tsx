@@ -214,11 +214,11 @@ export function ParametreProfilForm({
                   onKeyDown={
                     editingPersonal
                       ? (e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            void handleSavePersonal();
-                          }
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          void handleSavePersonal();
                         }
+                      }
                       : undefined
                   }
                   readOnly={!editingPersonal}
@@ -239,11 +239,11 @@ export function ParametreProfilForm({
                   onKeyDown={
                     editingPersonal
                       ? (e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            void handleSavePersonal();
-                          }
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          void handleSavePersonal();
                         }
+                      }
                       : undefined
                   }
                   readOnly={!editingPersonal}
@@ -279,11 +279,11 @@ export function ParametreProfilForm({
                   onKeyDown={
                     editingPersonal
                       ? (e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            void handleSavePersonal();
-                          }
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          void handleSavePersonal();
                         }
+                      }
                       : undefined
                   }
                   readOnly={!editingPersonal}
@@ -334,9 +334,8 @@ export function ParametreProfilForm({
           </div>
           {personalSaveMessage && (
             <p
-              className={`mt-3 text-sm font-medium m-0 text-right ${
-                personalSaveStatus === "error" ? "text-red-600" : "text-emerald-700"
-              }`}
+              className={`mt-3 text-sm font-medium m-0 text-right ${personalSaveStatus === "error" ? "text-red-600" : "text-emerald-700"
+                }`}
               role="status"
             >
               {personalSaveMessage}
@@ -366,11 +365,11 @@ export function ParametreProfilForm({
                   onKeyDown={
                     editingPassword
                       ? (e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            void handleSavePassword();
-                          }
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          void handleSavePassword();
                         }
+                      }
                       : undefined
                   }
                   readOnly={!editingPassword}
@@ -408,11 +407,11 @@ export function ParametreProfilForm({
                   onKeyDown={
                     editingPassword
                       ? (e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            void handleSavePassword();
-                          }
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          void handleSavePassword();
                         }
+                      }
                       : undefined
                   }
                   readOnly={!editingPassword}
@@ -452,11 +451,11 @@ export function ParametreProfilForm({
                   onKeyDown={
                     editingPassword
                       ? (e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            void handleSavePassword();
-                          }
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          void handleSavePassword();
                         }
+                      }
                       : undefined
                   }
                   readOnly={!editingPassword}
@@ -524,9 +523,8 @@ export function ParametreProfilForm({
 
           {passwordSaveMessage && (
             <p
-              className={`mt-3 text-sm font-medium m-0 text-right ${
-                passwordSaveStatus === "error" ? "text-red-600" : "text-emerald-700"
-              }`}
+              className={`mt-3 text-sm font-medium m-0 text-right ${passwordSaveStatus === "error" ? "text-red-600" : "text-emerald-700"
+                }`}
               role="status"
             >
               {passwordSaveMessage}

@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import { requireAdminSession } from "@/lib/admin/require-admin-session";
 import { formatFirstname, formatLastname } from "@/lib/format-person-name";
-import { isValidFrenchPhone, normalizeFrenchPhone } from "@/lib/normalize-phone";
+import {
+  isValidFrenchPhone,
+  normalizeFrenchPhone,
+} from "@/lib/normalize-phone";
 import { prisma } from "@/lib/prisma";
 
 const MIN_PASSWORD = 8;
@@ -42,18 +45,22 @@ export async function GET(request: Request) {
     const limitParam = Number(searchParams.get("limit") ?? "20");
     const queryParam = searchParams.get("q")?.trim() ?? "";
 
-    const page = Number.isFinite(pageParam) && pageParam > 0
-      ? Math.floor(pageParam)
-      : 1;
-    const limit = Number.isFinite(limitParam) && limitParam > 0
-      ? Math.min(Math.floor(limitParam), 100)
-      : 20;
+    const page =
+      Number.isFinite(pageParam) && pageParam > 0 ? Math.floor(pageParam) : 1;
+    const limit =
+      Number.isFinite(limitParam) && limitParam > 0
+        ? Math.min(Math.floor(limitParam), 100)
+        : 20;
 
     const where = queryParam
       ? {
           OR: [
-            { firstname: { contains: queryParam, mode: "insensitive" as const } },
-            { lastname: { contains: queryParam, mode: "insensitive" as const } },
+            {
+              firstname: { contains: queryParam, mode: "insensitive" as const },
+            },
+            {
+              lastname: { contains: queryParam, mode: "insensitive" as const },
+            },
             { email: { contains: queryParam, mode: "insensitive" as const } },
             { phone: { contains: queryParam, mode: "insensitive" as const } },
           ],
@@ -136,28 +143,39 @@ export async function POST(request: Request) {
 
     if (!isValidFrenchPhone(phone)) {
       return NextResponse.json(
-        { message: "Le numéro de téléphone doit être au format français valide (+33XXXXXXXXX)." },
+        {
+          message:
+            "Le numéro de téléphone doit être au format français valide (+33XXXXXXXXX).",
+        },
         { status: 400 },
       );
     }
 
     if (password.length < MIN_PASSWORD) {
       return NextResponse.json(
-        { message: `Le mot de passe doit contenir au moins ${MIN_PASSWORD} caractères.` },
+        {
+          message: `Le mot de passe doit contenir au moins ${MIN_PASSWORD} caractères.`,
+        },
         { status: 400 },
       );
     }
 
     if (!/[A-Z]/.test(password)) {
       return NextResponse.json(
-        { message: "Le mot de passe doit contenir au moins une lettre majuscule." },
+        {
+          message:
+            "Le mot de passe doit contenir au moins une lettre majuscule.",
+        },
         { status: 400 },
       );
     }
 
     if (!/[!@#$%^&*(),.?":{}|<>_\-+=~`’€£§]/.test(password)) {
       return NextResponse.json(
-        { message: "Le mot de passe doit contenir au moins un caractère spécial." },
+        {
+          message:
+            "Le mot de passe doit contenir au moins un caractère spécial.",
+        },
         { status: 400 },
       );
     }
@@ -266,9 +284,16 @@ export async function PATCH(request: Request) {
       );
     }
 
-    if (hasRoleUpdate && body.userId === session.user.id && body.role === "USER") {
+    if (
+      hasRoleUpdate &&
+      body.userId === session.user.id &&
+      body.role === "USER"
+    ) {
       return NextResponse.json(
-        { message: "Vous ne pouvez pas retirer votre propre rôle administrateur." },
+        {
+          message:
+            "Vous ne pouvez pas retirer votre propre rôle administrateur.",
+        },
         { status: 400 },
       );
     }
@@ -293,10 +318,10 @@ export async function PATCH(request: Request) {
       }
 
       if (
-        hasRoleUpdate
-        && existingUser.role === "ADMIN"
-        && body.role === "USER"
-        && existingUser.status === "ACTIVE"
+        hasRoleUpdate &&
+        existingUser.role === "ADMIN" &&
+        body.role === "USER" &&
+        existingUser.status === "ACTIVE"
       ) {
         const activeAdminsCount = await tx.user.count({
           where: {
@@ -363,7 +388,10 @@ export async function PATCH(request: Request) {
 
     if (error instanceof Error && error.message === "LAST_ACTIVE_ADMIN") {
       return NextResponse.json(
-        { message: "Impossible de retirer le rôle admin : au moins un administrateur actif est requis." },
+        {
+          message:
+            "Impossible de retirer le rôle admin : au moins un administrateur actif est requis.",
+        },
         { status: 400 },
       );
     }

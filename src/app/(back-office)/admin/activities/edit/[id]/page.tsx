@@ -9,7 +9,9 @@ import {
   StatusType,
 } from "@/app/generated/prisma";
 import { authOptions } from "@/lib/auth-options";
+import { ACTIVITY_CATEGORY_DEFINITIONS, activityTagToCategory } from "@/lib/activities";
 import { prisma } from "@/lib/prisma";
+import { ActivityFormPreviewButton } from "@/components/back-office/activities/activity-form-preview-button";
 import { ActivityDescriptionField } from "@/components/back-office/activities/activity-description-field";
 import { ActivityTitleField } from "@/components/back-office/activities/activity-title-field";
 import { ArticleContentField } from "@/components/back-office/articles/article-content-field";
@@ -17,15 +19,14 @@ import { UnsavedFormGuard } from "@/components/back-office/unsaved-form-guard";
 
 export const dynamic = "force-dynamic";
 
-const TAG_SELECT_OPTIONS: { value: string; label: string }[] = [
-  { value: "meditation", label: "Méditation" },
-  { value: "respiration", label: "Respiration" },
-  { value: "musique", label: "Musique" },
-  { value: "exercice", label: "Exercice" },
-  { value: "relaxation", label: "Relaxation" },
-];
+const TAG_SELECT_OPTIONS = ACTIVITY_CATEGORY_DEFINITIONS.map((def) => ({
+  value: def.tagAliases[0],
+  label: def.label,
+}));
 
-const ALLOWED_ACTIVITY_TAGS = new Set(TAG_SELECT_OPTIONS.map((opt) => opt.value));
+const ALLOWED_ACTIVITY_TAGS = new Set(
+  ACTIVITY_CATEGORY_DEFINITIONS.flatMap((d) => d.tagAliases),
+);
 
 const DIFFICULTY_SELECT_OPTIONS = [
   { value: DifficultyLevel.EASY, label: "Facile" },
@@ -184,9 +185,11 @@ async function updateActivityAction(formData: FormData) {
         action: "ACTIVITY_UPDATED",
         actorUserId: session.user.id,
         actorEmail: session.user.email ?? "",
-        targetUserId: existing.id,
-        targetEmail: title,
+        targetUserId: "",
+        targetEmail: null,
         metadata: {
+          contentId: existing.id,
+          contentTitle: existing.title,
           titleFrom: existing.title,
           titleTo: title,
           descriptionFrom: existing.description,
@@ -229,11 +232,12 @@ export default async function EditActivityPage({
     notFound();
   }
 
-  const tagOptions = [...TAG_SELECT_OPTIONS];
+  const tagOptions: { value: string; label: string }[] = [...TAG_SELECT_OPTIONS];
   if (!ALLOWED_ACTIVITY_TAGS.has(activity.tag)) {
+    const { label } = activityTagToCategory(activity.tag);
     tagOptions.push({
       value: activity.tag,
-      label: `${activity.tag} (hérité)`,
+      label: `${label} (hérité)`,
     });
   }
 
@@ -261,12 +265,9 @@ export default async function EditActivityPage({
           Mettez à jour les champs ci-dessous. Le contenu reste en{" "}
           <strong className="font-semibold text-gray-800">Markdown</strong>.
         </p>
-        <Link
-          href={`/admin/activities/preview/${id}`}
-          className="mt-3 inline-flex items-center rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 no-underline transition hover:bg-slate-100"
-        >
-          Voir l&apos;aperçu
-        </Link>
+        <div className="mt-3">
+          <ActivityFormPreviewButton formId="edit-activity-form" previewPath="/preview/activities/edit" />
+        </div>
       </section>
 
       <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">

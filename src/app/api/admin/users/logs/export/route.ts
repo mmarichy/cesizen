@@ -3,7 +3,11 @@ import { type AdminAuditAction } from "@/app/generated/prisma";
 import { requireAdminSession } from "@/lib/admin/require-admin-session";
 import { prisma } from "@/lib/prisma";
 
-const USER_LOG_ACTIONS: AdminAuditAction[] = ["USER_CREATED", "USER_STATUS_CHANGED", "USER_DELETED"];
+const USER_LOG_ACTIONS: AdminAuditAction[] = [
+  "USER_CREATED",
+  "USER_STATUS_CHANGED",
+  "USER_DELETED",
+];
 
 function actionLabel(action: string) {
   if (action === "USER_CREATED") {
@@ -73,9 +77,10 @@ function formatMetadataDetails(metadata: unknown) {
   const metadataObject = metadata as Record<string, unknown>;
   const details: string[] = [];
 
-  const field = typeof metadataObject.field === "string"
-    ? metadataObject.field.toLowerCase()
-    : null;
+  const field =
+    typeof metadataObject.field === "string"
+      ? metadataObject.field.toLowerCase()
+      : null;
   const fromValue = metadataValueLabel(metadataObject.from);
   const toValue = metadataValueLabel(metadataObject.to);
 
@@ -115,7 +120,7 @@ function formatDateTime(value: Date) {
 }
 
 function csvCell(value: string) {
-  const escaped = value.replaceAll("\"", "\"\"");
+  const escaped = value.replaceAll('"', '""');
   return `"${escaped}"`;
 }
 
@@ -134,11 +139,12 @@ export async function GET(request: Request) {
     const thirtyDaysAgo = new Date(now);
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const dateFilter = period === "7d"
-      ? { createdAt: { gte: sevenDaysAgo } }
-      : period === "all"
-        ? undefined
-        : { createdAt: { gte: thirtyDaysAgo } };
+    const dateFilter =
+      period === "7d"
+        ? { createdAt: { gte: sevenDaysAgo } }
+        : period === "all"
+          ? undefined
+          : { createdAt: { gte: thirtyDaysAgo } };
     const where = {
       ...dateFilter,
       action: {
@@ -165,7 +171,8 @@ export async function GET(request: Request) {
       .map((row) => row.map((cell) => csvCell(cell)).join(";"))
       .join("\n");
 
-    const periodSuffix = period === "7d" ? "7j" : period === "all" ? "all" : "30j";
+    const periodSuffix =
+      period === "7d" ? "7j" : period === "all" ? "all" : "30j";
     const filename = `logs-utilisateurs-${periodSuffix}-${new Date().toISOString().slice(0, 10)}.csv`;
 
     return new NextResponse(`\uFEFF${csvContent}`, {

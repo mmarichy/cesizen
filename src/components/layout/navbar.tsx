@@ -4,9 +4,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
-import { User, LogIn, DoorOpen } from "lucide-react";
+import { User, LogIn, DoorOpen, Home, BookOpen, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { navLinks, mobileNavLinks } from "@/constants";
+
+const navLinks = [
+  { href: "/", label: "Accueil", icon: Home },
+  { href: "/articles", label: "Articles", icon: BookOpen },
+  { href: "/activites", label: "Activités", icon: Activity },
+];
+const mobileNavLinks = [
+  { href: "/", label: "Accueil", icon: Home },
+  { href: "/articles", label: "Articles", icon: BookOpen },
+  { href: "/activites", label: "Activités", icon: Activity },
+  { href: "/auth/login", label: "Connexion", icon: LogIn },
+];
 
 const mobileMainLinks = mobileNavLinks.filter((l) => l.href !== "/auth/login");
 

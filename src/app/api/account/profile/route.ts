@@ -39,7 +39,9 @@ export async function PATCH(req: Request) {
     const body = (await req.json()) as Body;
     const firstnameTrim = body.firstname?.trim();
     const lastnameTrim = body.lastname?.trim();
-    const firstname = firstnameTrim ? formatFirstname(firstnameTrim) : firstnameTrim;
+    const firstname = firstnameTrim
+      ? formatFirstname(firstnameTrim)
+      : firstnameTrim;
     const lastname = lastnameTrim ? formatLastname(lastnameTrim) : lastnameTrim;
     const phoneRaw = body.phone;
     const phone =
@@ -80,7 +82,9 @@ export async function PATCH(req: Request) {
       }
       if (newPassword !== confirmNewPassword) {
         return NextResponse.json(
-          { error: "La confirmation ne correspond pas au nouveau mot de passe." },
+          {
+            error: "La confirmation ne correspond pas au nouveau mot de passe.",
+          },
           { status: 400 },
         );
       }
@@ -95,7 +99,10 @@ export async function PATCH(req: Request) {
       select: { id: true, password: true },
     });
     if (!user) {
-      return NextResponse.json({ error: "Compte introuvable." }, { status: 404 });
+      return NextResponse.json(
+        { error: "Compte introuvable." },
+        { status: 404 },
+      );
     }
 
     if (wantsPasswordChange) {

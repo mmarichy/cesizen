@@ -170,8 +170,6 @@ export async function getDashboardStats(): Promise<DashboardStats> {
         break;
       }
 
-      // On force la fermeture pour repartir sur une nouvelle connexion DB au retry suivant.
-      await prisma.$disconnect().catch(() => undefined);
       await sleep(RETRY_DELAY_MS * attempt);
     }
   }

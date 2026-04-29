@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 type DeleteActivityButtonProps = {
@@ -29,6 +30,8 @@ export function DeleteActivityButton({
       formData.set("activityId", activityId);
       await deleteAction(formData);
       setIsOpen(false);
+    } catch {
+      toast.error("Erreur lors de la suppression de l'activité");
     } finally {
       setIsLoading(false);
     }

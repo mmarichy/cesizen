@@ -8,12 +8,12 @@ import {
 import { toast, Toaster } from "sonner";
 import {
 	Clock3,
-	Eye,
 	Pencil,
 	Plus,
 	Power,
 } from "lucide-react";
 import { AdminSearchInput } from "@/components/back-office/admin-search-input";
+import { ActivityPreviewButton } from "@/components/back-office/activities/activity-preview-button";
 import { DeleteActivityButton } from "@/components/back-office/activities/delete-activity-button";
 import { useAdminActivities } from "@/components/back-office/activities/use-admin-activities";
 import { toggleButtonClassName } from "@/components/back-office/users/users-shared";
@@ -304,12 +304,10 @@ export default function ActivitiesAdminPage() {
 											</div>
 
 											<div className="mt-4 flex min-w-0 items-center gap-2">
-												<Link
-													href={`/admin/activities/preview/${activity.id}`}
-													aria-label={`Aperçu de l'activité ${activity.title}`}
-													className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-700 no-underline transition hover:bg-slate-100">
-													<Eye size={14} />
-												</Link>
+											<ActivityPreviewButton
+												activityId={activity.id}
+												variant="icon"
+											/>
 												<Link
 													href={`/admin/activities/edit/${activity.id}`}
 													aria-label={`Modifier l'activité ${activity.title}`}
@@ -472,12 +470,10 @@ export default function ActivitiesAdminPage() {
 													</td>
 													<td className="px-3 py-5 text-sm">
 														<div className="flex flex-wrap items-center justify-end gap-2">
-															<Link
-																href={`/admin/activities/preview/${activity.id}`}
-																className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 no-underline transition hover:bg-slate-100">
-																<Eye size={14} />
-																Aperçu
-															</Link>
+															<ActivityPreviewButton
+																activityId={activity.id}
+																variant="full"
+															/>
 															<Link
 																href={`/admin/activities/edit/${activity.id}`}
 																className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full border border-violet-200 bg-violet-50 px-3 py-2 text-sm font-semibold text-violet-700 no-underline transition hover:bg-violet-100">

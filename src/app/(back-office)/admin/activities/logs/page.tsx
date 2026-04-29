@@ -404,9 +404,9 @@ export default async function AdminActivityLogsPage({
                         <span className="shrink-0 font-semibold text-gray-900">Cible: </span>
                         <span
                           className="min-w-0 truncate"
-                          title={log.targetEmail || log.targetUserId || "-"}
+                          title={(log.metadata as { contentTitle?: string } | null)?.contentTitle || log.targetEmail || log.targetUserId || "-"}
                         >
-                          {log.targetEmail || log.targetUserId || "-"}
+                          {(log.metadata as { contentTitle?: string } | null)?.contentTitle || log.targetEmail || log.targetUserId || "-"}
                         </span>
                       </p>
                       <p className="flex min-w-0 gap-1 text-gray-700">
@@ -437,7 +437,7 @@ export default async function AdminActivityLogsPage({
                 </thead>
                 <tbody>
                   {logs.map((log) => {
-                    const targetLabel = log.targetEmail || log.targetUserId || "-";
+                    const targetLabel = (log.metadata as { contentTitle?: string } | null)?.contentTitle || log.targetEmail || log.targetUserId || "-";
                     return (
                       <tr key={log.id} className="border-t border-gray-100">
                         <td className="min-w-0 max-w-0 overflow-hidden px-4 py-5 text-sm align-middle">
