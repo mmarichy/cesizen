@@ -1,8 +1,11 @@
-const CACHE_NAME = "cesizen-v1";
+const CACHE_NAME = "cesizen-v2";
+
+const OFFLINE_PAGE_URL = new URL("/offline.html", self.location).href;
 
 const STATIC_ASSETS = [
   "/img/logo-small-bg-white-192px.png",
   "/img/logo-full-bg-white-1000px.png",
+  OFFLINE_PAGE_URL,
 ];
 
 self.addEventListener("install", (event) => {
@@ -66,14 +69,16 @@ self.addEventListener("fetch", (event) => {
   if (request.mode === "navigate") {
     event.respondWith(
       fetch(request).catch(() =>
-        caches.match(request).then(
-          (cached) =>
-            cached ||
-            new Response(
-              "<html><body><p>Vous êtes hors ligne. Veuillez vérifier votre connexion.</p></body></html>",
+        caches.match(request).then((cached) => {
+          if (cached) return cached;
+          return caches.match(OFFLINE_PAGE_URL).then((offline) => {
+            if (offline) return offline;
+            return new Response(
+              "<!DOCTYPE html><html lang=fr><meta charset=utf-8><title>Hors connexion</title><p>Vous êtes hors ligne.</p></html>",
               { headers: { "Content-Type": "text/html; charset=utf-8" } }
-            )
-        )
+            );
+          });
+        })
       )
     );
     return;
