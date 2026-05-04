@@ -1,11 +1,25 @@
-import type { Metadata } from "next";
-import { Navbar } from "@/components/layout/navbar";
-import { Footer } from "@/components/layout/footer";
+import type { Metadata, Viewport } from "next";
+import { AuthSessionProvider } from "@/components/providers/session-provider";
+import { PwaRegister } from "@/components/providers/pwa-register";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Cesizen",
-  description: "Cesizen se ressourcer et s'apaiser ensemble",
+    description:
+    "Cesizen — la plateforme pour se ressourcer et s'apaiser ensemble.",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Cesizen",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#ffffff",
+  width: "device-width",
+  initialScale: 1,
+  minimumScale: 1,
 };
 
 export default function RootLayout({
@@ -15,12 +29,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
+      <head>
+        <link
+          rel="apple-touch-icon"
+          href="/img/logo-small-bg-white-192px.png"
+        />
+      </head>
       <body>
-        <Navbar />
-        {children}
-        {/* Espaceur pour la barre de navigation mobile fixe en bas */}
-        <div className="h-24 md:hidden" aria-hidden="true" />
-        <Footer />
+        <AuthSessionProvider>{children}</AuthSessionProvider>
+        <PwaRegister />
       </body>
     </html>
   );

@@ -14,13 +14,111 @@ enum Role {
   ADMIN
 }
 
+enum UserStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum AdminAuditAction {
+  USER_CREATED
+  USER_STATUS_CHANGED
+  USER_DELETED
+  ARTICLE_CREATED
+  ARTICLE_UPDATED
+  ARTICLE_STATUS_CHANGED
+  ARTICLE_DELETED
+  ACTIVITY_CREATED
+  ACTIVITY_UPDATED
+  ACTIVITY_STATUS_CHANGED
+  ACTIVITY_DELETED
+}
+
+enum StatusType {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum DifficultyLevel {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum ActivityDuration {
+  MIN_15
+  MIN_30
+  MIN_45
+  HOUR_1
+}
+
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  firstname String
-  lastname  String
-  password  String
-  role      Role     @default(USER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                String             @id @default(cuid())
+  email             String             @unique
+  firstname         String
+  lastname          String
+  phone             String?
+  password          String
+  role              Role               @default(USER)
+  status            UserStatus         @default(ACTIVE)
+  activityFavorites ActivityFavorite[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+}
+
+model Article {
+  id          String     @id @default(uuid())
+  title       String
+  description String
+  content     String
+  tag         String
+  date        DateTime   @default(now()) @db.Date
+  status      StatusType @default(DRAFT)
+  author      String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  archivedAt  DateTime?
+}
+
+model Activity {
+  id          String     @id @default(uuid())
+  title       String
+  description String
+  content     String
+  tag         String
+  difficulty  DifficultyLevel  @default(EASY)
+  duration    ActivityDuration @default(MIN_15)
+  date        DateTime   @default(now()) @db.Date
+  status      StatusType @default(DRAFT)
+  author      String
+  favoritedBy ActivityFavorite[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  archivedAt  DateTime?
+}
+
+model ActivityFavorite {
+  userId     String
+  activityId String
+  createdAt  DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@id([userId, activityId])
+  @@index([activityId])
+}
+
+model AdminAuditLog {
+  id            String           @id @default(cuid())
+  action        AdminAuditAction
+  actorUserId   String
+  actorEmail    String
+  targetUserId  String
+  targetEmail   String?
+  metadata      Json?
+  createdAt     DateTime         @default(now())
+
+  @@index([action, createdAt])
+  @@index([targetUserId, createdAt])
 }
