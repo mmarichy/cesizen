@@ -39,49 +39,38 @@ const MOCK_ARTICLES: Article[] = [
 	},
 ];
 
-describe("Recherche d'articles", () => {
-	it("trouve des articles via le titre", () => {
-		const result = filterArticlesForListing(
+describe("Recherche et filtrage des articles", () => {
+	it("recherche texte : titre ou libellé de catégorie", () => {
+		const parTitre = filterArticlesForListing(
 			MOCK_ARTICLES,
 			"respirer",
 			null,
 		);
+		expect(parTitre).toHaveLength(1);
+		expect(parTitre[0]?.title).toBe("Respirer en pleine conscience");
 
-		expect(result).toHaveLength(1);
-		expect(result[0]?.title).toBe(
-			"Respirer en pleine conscience",
-		);
-	});
-
-	it("trouve des articles via le nom de catégorie", () => {
-		const result = filterArticlesForListing(
+		const parCatégorie = filterArticlesForListing(
 			MOCK_ARTICLES,
 			"nutrition",
 			null,
 		);
-
-		expect(result).toHaveLength(1);
-		expect(result[0]?.category.label).toBe("Nutrition");
+		expect(parCatégorie).toHaveLength(1);
+		expect(parCatégorie[0]?.category.label).toBe("Nutrition");
 	});
 
-	it("ignore la casse et les espaces en début/fin", () => {
+	it("normalise casse et espaces pour la recherche", () => {
 		expect(
 			articleMatchesQuery(MOCK_ARTICLES[0], "  MIEUX  "),
 		).toBe(true);
 	});
 
-	it("retourne tous les articles si la recherche est vide", () => {
-		const result = filterArticlesForListing(
-			MOCK_ARTICLES,
-			"",
-			null,
-		);
-		expect(result).toHaveLength(3);
+	it("sans filtre : recherche vide et catégorie null retournent la liste complète", () => {
+		expect(
+			filterArticlesForListing(MOCK_ARTICLES, "", null),
+		).toHaveLength(3);
 	});
-});
 
-describe("Filtrage des articles par catégorie", () => {
-	it("filtre correctement par catégorie", () => {
+	it("filtre par catégorie sélectionnée", () => {
 		const result = filterArticlesForListing(
 			MOCK_ARTICLES,
 			"",
@@ -89,22 +78,10 @@ describe("Filtrage des articles par catégorie", () => {
 		);
 
 		expect(result).toHaveLength(1);
-		expect(result[0]?.title).toBe(
-			"Respirer en pleine conscience",
-		);
+		expect(result[0]?.title).toBe("Respirer en pleine conscience");
 	});
 
-	it("retourne tous les articles si catégorie à null", () => {
-		const result = filterArticlesForListing(
-			MOCK_ARTICLES,
-			"",
-			null,
-		);
-
-		expect(result).toHaveLength(3);
-	});
-
-	it("articleMatchesCategory gère la catégorie active", () => {
+	it("articleMatchesCategory reflète la catégorie active", () => {
 		expect(
 			articleMatchesCategory(
 				MOCK_ARTICLES[0],

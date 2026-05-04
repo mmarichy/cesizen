@@ -36,7 +36,7 @@ const MOCK_ACTIVITIES: Activity[] = [
 ];
 
 describe("Recherche et filtres des activités", () => {
-	it("trouve une activité via la recherche texte", () => {
+	it("recherche texte et normalisation casse / espaces", () => {
 		const result = filterActivitiesForListing(
 			MOCK_ACTIVITIES,
 			"méditation",
@@ -46,9 +46,7 @@ describe("Recherche et filtres des activités", () => {
 		);
 		expect(result).toHaveLength(1);
 		expect(result[0]?.title).toBe("Méditation du soir");
-	});
 
-	it("ignore la casse et les espaces pour la recherche", () => {
 		expect(
 			activityMatchesQuery(
 				MOCK_ACTIVITIES[0],
@@ -57,31 +55,29 @@ describe("Recherche et filtres des activités", () => {
 		).toBe(true);
 	});
 
-	it("filtre correctement par catégorie", () => {
-		const result = filterActivitiesForListing(
+	it("filtre par catégorie et par difficulté", () => {
+		const parCat = filterActivitiesForListing(
 			MOCK_ACTIVITIES,
 			"",
 			"Exercice",
 			null,
 			null,
 		);
-		expect(result).toHaveLength(1);
-		expect(result[0]?.title).toBe("Étirements anti-stress");
-	});
+		expect(parCat).toHaveLength(1);
+		expect(parCat[0]?.title).toBe("Étirements anti-stress");
 
-	it("filtre correctement par difficulté", () => {
-		const result = filterActivitiesForListing(
+		const parDiff = filterActivitiesForListing(
 			MOCK_ACTIVITIES,
 			"",
 			null,
 			"Moyen",
 			null,
 		);
-		expect(result).toHaveLength(1);
-		expect(result[0]?.title).toBe("Méditation du soir");
+		expect(parDiff).toHaveLength(1);
+		expect(parDiff[0]?.title).toBe("Méditation du soir");
 	});
 
-	it("filtre correctement par durée", () => {
+	it("filtre par durée", () => {
 		const result = filterActivitiesForListing(
 			MOCK_ACTIVITIES,
 			"",
@@ -93,7 +89,7 @@ describe("Recherche et filtres des activités", () => {
 		expect(result[0]?.title).toBe("Respiration carrée");
 	});
 
-	it("combine recherche + filtres", () => {
+	it("combine recherche et filtres", () => {
 		const result = filterActivitiesForListing(
 			MOCK_ACTIVITIES,
 			"soir",
