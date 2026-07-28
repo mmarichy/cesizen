@@ -1,8 +1,9 @@
-const CACHE_NAME = "cesizen-v2";
+const CACHE_NAME = "cesizen-v5";
 
 const OFFLINE_PAGE_URL = new URL("/offline.html", self.location).href;
 
 const STATIC_ASSETS = [
+  "/img/logo-small-bg-none-192px.png",
   "/img/logo-small-bg-white-192px.png",
   "/img/logo-full-bg-white-1000px.png",
   OFFLINE_PAGE_URL,

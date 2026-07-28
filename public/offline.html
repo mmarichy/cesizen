@@ -2,34 +2,213 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Hors connexion</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>Hors connexion — Cesizen</title>
   <style>
     * { box-sizing: border-box; }
+
+    html {
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+
     body {
       margin: 0;
       min-height: 100vh;
+      min-height: 100dvh;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 1.5rem;
+      padding:
+        max(1.25rem, env(safe-area-inset-top))
+        max(1.25rem, env(safe-area-inset-right))
+        max(1.25rem, env(safe-area-inset-bottom))
+        max(1.25rem, env(safe-area-inset-left));
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-      color: #1a1a1a;
-      background: #f6f6f4;
+      color: #1f2937;
+      background:
+        radial-gradient(ellipse 70% 50% at 15% 20%, rgba(52, 211, 153, 0.22), transparent 55%),
+        radial-gradient(ellipse 60% 45% at 85% 80%, rgba(250, 204, 21, 0.2), transparent 50%),
+        linear-gradient(145deg, #ffffff 0%, #ecfdf5 45%, #fefce8 100%);
       line-height: 1.5;
     }
+
     main {
-      max-width: 28rem;
+      position: relative;
+      max-width: 22rem;
+      width: 100%;
       text-align: center;
+      animation: fade-in 0.6s ease-out;
     }
-    h1 { font-size: 1.25rem; font-weight: 600; margin: 0 0 0.75rem; }
-    p { margin: 0; color: #444; font-size: 0.95rem; }
+
+    .logo {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 1rem;
+      object-fit: contain;
+    }
+
+    .brand {
+      margin: 0 0 1.5rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #00BC7D 0%, #00C950 55%, #FDC700 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .icon-wrap {
+      width: 3.25rem;
+      height: 3.25rem;
+      margin: 0 auto 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 1rem;
+      background: linear-gradient(135deg, rgba(0, 188, 125, 0.12), rgba(253, 199, 0, 0.15));
+      color: #059669;
+    }
+
+    .icon-wrap svg {
+      width: 1.6rem;
+      height: 1.6rem;
+    }
+
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin: 0 0 0.65rem;
+      color: #111827;
+      letter-spacing: -0.02em;
+    }
+
+    .message {
+      margin: 0 0 1.5rem;
+      color: #4b5563;
+      font-size: 0.95rem;
+    }
+
+    button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 48px;
+      padding: 0.85rem 1.25rem;
+      border: none;
+      border-radius: 0.9rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #fff;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      background: linear-gradient(135deg, #00BC7D 0%, #00C950 100%);
+      box-shadow: 0 10px 24px rgba(0, 188, 125, 0.28);
+      transition: transform 0.2s ease, filter 0.2s ease;
+    }
+
+    button:active {
+      transform: scale(0.97);
+      filter: brightness(0.97);
+    }
+
+    .hint {
+      margin: 1.15rem 0 0;
+      font-size: 0.8rem;
+      color: #9ca3af;
+      padding-inline: 0.25rem;
+    }
+
+    @media (min-width: 480px) {
+      body {
+        padding:
+          max(1.5rem, env(safe-area-inset-top))
+          max(1.5rem, env(safe-area-inset-right))
+          max(1.5rem, env(safe-area-inset-bottom))
+          max(1.5rem, env(safe-area-inset-left));
+      }
+
+      .logo {
+        width: 88px;
+        height: 88px;
+        margin-bottom: 1.25rem;
+      }
+
+      .brand {
+        margin-bottom: 1.75rem;
+        font-size: 1.35rem;
+      }
+
+      .icon-wrap {
+        width: 3.5rem;
+        height: 3.5rem;
+        margin-bottom: 1.25rem;
+      }
+
+      .icon-wrap svg {
+        width: 1.75rem;
+        height: 1.75rem;
+      }
+
+      h1 { font-size: 1.35rem; }
+
+      .message {
+        margin-bottom: 1.75rem;
+        font-size: 0.975rem;
+      }
+
+      button {
+        display: inline-flex;
+        width: auto;
+        min-width: 10rem;
+        margin-inline: auto;
+        padding: 0.7rem 1.35rem;
+        font-size: 0.9rem;
+      }
+
+      button:hover {
+        filter: brightness(1.05);
+        transform: scale(1.03);
+      }
+    }
+
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
   <main>
-    <h1>Hors connexion</h1>
-    <p>Vous êtes hors ligne. Veuillez vérifier votre connexion.</p>
+    <img
+      class="logo"
+      src="/img/logo-small-bg-none-192px.png"
+      alt="Logo Cesizen"
+      width="88"
+      height="88"
+    />
+    <p class="brand">Cesizen</p>
+
+    <div class="icon-wrap" aria-hidden="true">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 0 1 7.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 0 1 1.06 0Z" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18" />
+      </svg>
+    </div>
+
+    <h1>Vous êtes hors ligne</h1>
+    <p class="message">
+      Impossible de rejoindre Cesizen pour le moment.
+      Vérifiez votre connexion internet, puis réessayez.
+    </p>
+
+    <button type="button" onclick="location.reload()">
+      Réessayer
+    </button>
   </main>
 </body>
 </html>

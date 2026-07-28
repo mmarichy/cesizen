@@ -1,6 +1,6 @@
 # Cahier de recette — CESIZen
 
-Référence métier condensée. **Exécution / statuts** : [`cahier-test.md`](./cahier-test.md). **Synthèse / décision** : [`pv-recette.md`](./pv-recette.md). **Processus** : [`plan-de-test.md`](./plan-de-test.md).
+Référence métier condensée. **Exécution / statuts** : [`cahier-test.md`](./cahier-test.md). **Synthèse / décision** : [`modele-pv-recette.md`](./modele-pv-recette.md). **Processus** : [`plan-de-test.md`](./plan-de-test.md).
 
 ---
 
@@ -25,7 +25,7 @@ Valider front-office (consultation, compte, favoris), back-office admin (utilisa
 - **Front** : articles (liste, détail, recherche titre + catégorie, URL), activités (liste, détail, filtres), compte, favoris.
 - **Admin** : accès par rôle, CRUD utilisateurs / articles / activités, dashboard & journaux si présents.
 - **API** : `/api/articles`, `/api/activities`, `/api/account/*`, `/api/admin/*`.
-- **Vitest** : **26** tests **TU-01 … TU-26** — **source unique** : [`plan-de-test.md`](./plan-de-test.md) **§3.1** ; grille campagne [`cahier-test.md`](./cahier-test.md) **§6 bis** (plages). Hors auto : API publiques réelles, compte, UI navigateur, auth cookie, PWA.
+- **Vitest** : **26** tests **TU-01 … TU-26** — **source unique** : [`plan-de-test.md`](./plan-de-test.md) **§3.1** ; grille campagne [`cahier-test.md`](./cahier-test.md) **§6** (plages). Hors auto : API publiques réelles, compte, UI navigateur, auth cookie, PWA.
 - **Hors périmètre** : charge, SEO poussé, WCAG détaillé, navigateurs legacy ; **FR-07** (non publiés) sans jeu de données adapté.
 
 ---
